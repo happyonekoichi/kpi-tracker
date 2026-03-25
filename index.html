@@ -1239,15 +1239,22 @@ function exportCSV() {
 
 // ===== バックアップ / 復元 =====
 function exportBackup() {
+  // KPIデータも収集
+  const kpiData = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k.startsWith('kpi_')) kpiData[k]=JSON.parse(localStorage.getItem(k));
+  }
   const data = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     facilities: facilities,
     visitLogs: visitLogs,
     dailyData: dailyData,
     reportData: reportData,
     nextId: nextId,
-    nextRepId: nextRepId
+    nextRepId: nextRepId,
+    kpiData: kpiData
   };
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], {type: 'application/json'});
@@ -1256,7 +1263,7 @@ function exportBackup() {
   const d = new Date();
   a.download = 'medsales_backup_' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '.json';
   a.click();
-  showToast('バックアップを保存しました', 'ok');
+  showToast('バックアップを保存しました（KPI含む）', 'ok');
 }
 
 function importBackup(input) {
@@ -1270,7 +1277,8 @@ function importBackup(input) {
         showToast('ファイルが正しくありません', 'err'); return;
       }
       const count = data.facilities.length;
-      if (!confirm('復元すると現在のデータが上書きされます。\n施設数: ' + count + '件\nエクスポート日時: ' + (data.exportedAt||'不明') + '\n\n続けますか？')) {
+      const hasKpi = data.kpiData && Object.keys(data.kpiData).length > 0;
+      if (!confirm('復元すると現在のデータが上書きされます。\n施設数: ' + count + '件' + (hasKpi ? '\nKPIデータ: あり' : '') + '\nエクスポート日時: ' + (data.exportedAt||'不明') + '\n\n続けますか？')) {
         input.value = ''; return;
       }
       facilities  = data.facilities  || [];
@@ -1280,10 +1288,21 @@ function importBackup(input) {
       nextId      = data.nextId      || (Math.max(...facilities.map(f=>f.id), 2999) + 1);
       nextRepId   = data.nextRepId   || (reportData.length ? Math.max(...reportData.map(r=>r.id||0)) + 1 : 1);
       saveF(); saveL(); saveD(); saveR();
+      // KPIデータも復元
+      if (data.kpiData) {
+        // 既存のKPIデータをクリア
+        const kpiKeys=[];
+        for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('kpi_'))kpiKeys.push(k);}
+        kpiKeys.forEach(k=>localStorage.removeItem(k));
+        // 新しいKPIデータを書き込み
+        for(const[k,v] of Object.entries(data.kpiData)){
+          localStorage.setItem(k, JSON.stringify(v));
+        }
+      }
       buildChips();
       buildTabs();
       render();
-      showToast('復元しました（施設 ' + count + '件）', 'ok');
+      showToast('復元しました（施設 ' + count + '件' + (hasKpi ? '、KPIデータ含む' : '') + '）', 'ok');
     } catch(err) {
       showToast('読み込みに失敗しました', 'err');
     }
@@ -1375,7 +1394,7 @@ function renderKpi(){
     </div>`;
   }
   html+='</div>';
-  html+='<div class="kpi-actions"><button class="btn" onclick="openKpiSummary()">📊 サマリー・振り返り</button><button class="btn" onclick="kpiExportJSON()">💾 KPIバックアップ</button></div>';
+  html+='<div class="kpi-actions"><button class="btn" onclick="openKpiSummary()">📊 サマリー・振り返り</button></div>';
   // Log entries
   const sorted=[...entries].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
   if(!sorted.length){html+='<div class="empty"><div class="empty-icon">🎯</div>まだKPI活動記録がありません</div>';}
@@ -1517,15 +1536,6 @@ function openKpiSummary(){
 function kpiSaveReview(){
   kpiSetReview(kpiMonth,{own:document.getElementById('kpiReviewOwn').value,collab:document.getElementById('kpiReviewCollab').value,next:document.getElementById('kpiReviewNext').value});
   showToast('振り返りを保存しました','ok');
-}
-
-function kpiExportJSON(){
-  const data={};
-  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('kpi_'))data[k]=JSON.parse(localStorage.getItem(k));}
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='kpi_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();
-  showToast('KPIバックアップ完了','ok');
 }
 
 function kpiExportPDF(){
