@@ -2,897 +2,1570 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MedSales</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1a1a2e">
-<title>KPI Action Tracker</title>
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiS1BJIEFjdGlvbiBUcmFja2VyIiwic2hvcnRfbmFtZSI6IktQSSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMWExYTJlIiwidGhlbWVfY29sb3IiOiIjMWExYTJlIn0=">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root {
+  --bg:#f5f7fa; --surface:#fff; --surface2:#f0f2f5; --surface3:#e4e7ec;
+  --border:#dde1e8; --text:#1a1d23; --text2:#5a6170; --text3:#9aa0ad;
+  --accent:#2563eb; --accent2:#1d4ed8; --green:#16a34a; --yellow:#d97706;
+  --red:#dc2626; --purple:#7c3aed;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
 
-  :root {
-    --bg: #0f0f1a;
-    --surface: #1a1a2e;
-    --surface2: #232340;
-    --surface3: #2d2d50;
-    --text: #e8e8f0;
-    --text2: #9999b8;
-    --accent1: #ff6b6b;
-    --accent2: #4ecdc4;
-    --accent3: #ffe66d;
-    --cat1: #ff6b6b;
-    --cat1bg: rgba(255,107,107,0.12);
-    --cat2: #4ecdc4;
-    --cat2bg: rgba(78,205,196,0.12);
-    --cat3: #ffe66d;
-    --cat3bg: rgba(255,230,109,0.12);
-    --radius: 14px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.3);
-  }
+/* HEADER */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.97);border-bottom:1px solid var(--border);backdrop-filter:blur(10px);display:flex;align-items:center;gap:12px;padding:0 20px;height:56px;}
+.logo{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--accent);}
+.hstats{display:flex;gap:12px;margin-left:auto;}
+.hs{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);}
+.hs b{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:600;}
 
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+/* TABS */
+.tabs{position:fixed;top:56px;left:0;right:0;z-index:99;background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none;padding:0 4px;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:9px 14px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;transition:color 0.15s;}
+.tab:hover{color:var(--text2);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
-  body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100dvh;
-    overflow-x: hidden;
-    padding-bottom: 90px;
-  }
+/* LAYOUT */
+.main{display:flex;padding-top:96px;height:100vh;}
 
-  /* Header */
-  .header {
-    background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
-    padding: 16px 20px 14px;
-    position: sticky; top:0; z-index:100;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    backdrop-filter: blur(20px);
-  }
-  .header-top { display:flex; justify-content:space-between; align-items:center; }
-  .header h1 {
-    font-size: 18px; font-weight: 600;
-    background: linear-gradient(135deg, var(--accent1), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .header-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .month-nav {
-    display:flex; align-items:center; gap:12px;
-    background: var(--surface3); border-radius: 10px; padding: 6px 12px;
-  }
-  .month-nav button {
-    background:none; border:none; color:var(--text2); font-size:18px; cursor:pointer; padding:4px;
-    line-height:1;
-  }
-  .month-nav span { font-size:13px; font-weight:500; color:var(--text); min-width:70px; text-align:center; }
+/* SIDEBAR */
+.sidebar{width:240px;min-width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:calc(100vh - 96px);overflow:hidden;}
+.sb-sec{padding:10px 16px 4px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;}
+.filter-area{padding:8px 16px;border-top:1px solid var(--border);flex:1;overflow-y:auto;}
+.fg{margin-bottom:12px;}
+.fl{font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;}
+.chips{display:flex;flex-wrap:wrap;gap:4px;}
+.chip{padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;border:1px solid var(--border);color:var(--text2);transition:all .15s;background:transparent;}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+.chip.on{background:var(--accent2);border-color:var(--accent2);color:#fff;}
 
-  /* Tab Nav */
-  .tab-bar {
-    display:flex; gap:4px; padding:12px 16px 0;
-    position: sticky; top: 68px; z-index: 99;
-    background: var(--bg);
-  }
-  .tab {
-    flex:1; padding:10px 0; text-align:center; font-size:12px; font-weight:500;
-    border:none; border-radius: 10px 10px 0 0; cursor:pointer;
-    transition: all 0.2s; color: var(--text2); background: var(--surface);
-  }
-  .tab.active { color: var(--text); background: var(--surface2); }
-  .tab[data-tab="log"].active { border-top: 2px solid var(--accent2); }
-  .tab[data-tab="summary"].active { border-top: 2px solid var(--accent1); }
-  .tab[data-tab="settings"].active { border-top: 2px solid var(--accent3); }
+/* CONTENT */
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.toolbar{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sbox{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 12px;flex:1;max-width:400px;}
+.sbox input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:100%;font-family:'Noto Sans JP',sans-serif;}
+.sbox input::placeholder{color:var(--text3);}
+.btn{padding:7px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px;transition:all .15s;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.pri{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+.btn.pri:hover{background:var(--accent);}
+.rcount{font-size:12px;color:var(--text2);margin-left:auto;white-space:nowrap;}
 
-  /* Content */
-  .content { padding: 0 16px 16px; }
-  .panel { display:none; }
-  .panel.active { display:block; }
+/* FACILITY LIST */
+.flist{flex:1;overflow-y:auto;padding:10px 16px;}
+.fcard{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:7px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:12px;}
+.fcard:hover{border-color:var(--accent);background:var(--surface2);}
+.fcard.sel{border-color:var(--accent);background:#eff6ff;}
+.rbadge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;min-width:34px;text-align:center;flex-shrink:0;margin-top:1px;}
+.rCA{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;}
+.rCB{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;}
+.rHA{background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe;}
+.rHB{background:#ffedd5;color:#c2410c;border:1px solid #fed7aa;}
+.r検診C{background:#fef9c3;color:#854d0e;border:1px solid #fef08a;}
+.rnone{background:var(--surface2);color:var(--text3);border:1px solid var(--border);}
+.cmain{flex:1;min-width:0;}
+.cname{font-size:14px;font-weight:500;margin-bottom:3px;}
+.cmeta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.ctag{font-size:11px;color:var(--text2);}
+.mtag{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:500;}
+.mFuji{background:#fee2e2;color:#b91c1c;}
+.mOri{background:#dcfce7;color:#15803d;}
+.mOther{background:var(--surface2);color:var(--text3);}
+.cmemo{font-size:12px;color:var(--text2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:500px;}
+.grp-hdr{padding:10px 4px 4px;font-size:12px;font-weight:700;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:6px;margin-top:16px;}
+.grp-hdr:first-child{margin-top:0;}
+.area-hdr{padding:5px 4px 2px;font-size:11px;font-weight:600;color:var(--text2);}
 
-  /* KPI Dashboard Cards */
-  .kpi-cards { display:flex; flex-direction:column; gap:12px; margin-top:12px; }
-  .kpi-card {
-    background: var(--surface); border-radius: var(--radius); padding:16px;
-    border-left: 3px solid; position:relative; overflow:hidden;
-  }
-  .kpi-card::after {
-    content:''; position:absolute; top:0; right:0; width:80px; height:100%;
-    opacity:0.04; border-radius: 0 var(--radius) var(--radius) 0;
-  }
-  .kpi-card.cat1 { border-left-color: var(--cat1); }
-  .kpi-card.cat1::after { background: var(--cat1); }
-  .kpi-card.cat2 { border-left-color: var(--cat2); }
-  .kpi-card.cat2::after { background: var(--cat2); }
-  .kpi-card.cat3 { border-left-color: var(--cat3); }
-  .kpi-card.cat3::after { background: var(--cat3); }
+/* DETAIL */
+.dpanel{width:400px;min-width:400px;border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;height:calc(100vh - 96px);overflow:hidden;transition:width .2s,min-width .2s;}
+.dpanel.hide{width:0;min-width:0;overflow:hidden;}
+.dhdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
+.dname{font-size:15px;font-weight:600;margin-bottom:5px;}
+.dtags{display:flex;gap:6px;flex-wrap:wrap;}
+.xbtn{background:none;border:none;cursor:pointer;color:var(--text2);font-size:18px;padding:2px;}
+.xbtn:hover{color:var(--text);}
+.dbody{flex:1;overflow-y:auto;padding:14px 18px;}
+.dsec{margin-bottom:18px;}
+.dsec-t{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.iitem label{display:block;font-size:11px;color:var(--text3);margin-bottom:3px;}
+.iitem input,.iitem select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text);font-size:13px;font-family:'Noto Sans JP',sans-serif;outline:none;}
+.iitem input:focus,.iitem select:focus{border-color:var(--accent);}
+.mtarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px;color:var(--text);font-size:13px;font-family:'Noto Sans JP',sans-serif;outline:none;resize:vertical;min-height:70px;line-height:1.6;}
+.mtarea:focus{border-color:var(--accent);}
+.vlog{display:flex;flex-direction:column;gap:7px;}
+.ventry{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 11px;position:relative;}
+.vdate{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:3px;}
+.vcont{font-size:13px;color:var(--text);line-height:1.6;}
+.vdel{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;}
+.vdel:hover{color:var(--red);}
+.vsec{padding:12px 18px;border-top:1px solid var(--border);background:var(--bg);}
+.vbtn{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;font-family:'Noto Sans JP',sans-serif;}
+.vbtn:hover{border-color:var(--accent);color:var(--accent);}
+.vbtn.rec{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.vprev{margin-top:9px;padding:9px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text2);display:none;line-height:1.5;}
+.vprev.show{display:block;}
+.vactions{display:flex;gap:8px;margin-top:8px;}
+.vactions .btn{flex:1;justify-content:center;}
 
-  .kpi-card-title { font-size:13px; font-weight:600; margin-bottom:8px; }
-  .kpi-card-target { font-size:11px; color:var(--text2); margin-bottom:10px; }
-  .kpi-metric { display:flex; align-items:baseline; gap:6px; }
-  .kpi-number {
-    font-family:'JetBrains Mono',monospace; font-size:32px; font-weight:500;
-  }
-  .kpi-unit { font-size:12px; color:var(--text2); }
-  .kpi-bar { height:4px; background:var(--surface3); border-radius:2px; margin-top:10px; overflow:hidden; }
-  .kpi-bar-fill { height:100%; border-radius:2px; transition:width 0.6s ease; }
+/* 日報タブ */
+.daily-wrap{flex:1;overflow-y:auto;padding:12px 16px;display:none;}
+.daily-wrap.show{display:block;}
+.dnav{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.dnav-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:16px;}
+.dnav-btn:hover{border-color:var(--accent);}
+.dnav-label{flex:1;text-align:center;font-size:15px;font-weight:600;}
+.dsum-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;}
+.dsum-box label{display:block;font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;}
+.dsum-box textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;font-family:'Noto Sans JP',sans-serif;outline:none;resize:vertical;min-height:70px;line-height:1.6;color:var(--text);}
+.dsum-box textarea:focus{border-color:var(--accent);}
+.dvisit-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 13px;margin-bottom:8px;position:relative;}
+.dv-name{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:3px;}
+.dv-body{font-size:13px;color:var(--text);line-height:1.6;}
+.ddel{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;}
+.ddel:hover{color:var(--red);}
+.dadd-row{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+.dadd-row button{padding:9px;border-radius:8px;font-size:13px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .15s;}
+.dbtn-manual{border:1px dashed var(--border);background:transparent;color:var(--text3);}
+.dbtn-manual:hover{border-color:var(--accent);color:var(--accent);}
+.dbtn-voice{border:1px solid var(--border);background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;gap:8px;}
+.dbtn-voice:hover{border-color:var(--accent);color:var(--accent);}
+.dbtn-voice.rec{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red);animation:pulse 1s infinite;}
 
-  /* Activity Log */
-  .log-entry {
-    background: var(--surface); border-radius: var(--radius); padding:14px 16px;
-    margin-top: 10px; position:relative;
-  }
-  .log-entry-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-  .log-category {
-    font-size:10px; font-weight:600; padding:3px 8px; border-radius:6px;
-    text-transform:uppercase; letter-spacing:0.5px;
-  }
-  .log-category.cat1 { background:var(--cat1bg); color:var(--cat1); }
-  .log-category.cat2 { background:var(--cat2bg); color:var(--cat2); }
-  .log-category.cat3 { background:var(--cat3bg); color:var(--cat3); }
-  .log-date { font-size:11px; color:var(--text2); font-family:'JetBrains Mono',monospace; }
-  .log-facility { font-size:14px; font-weight:500; margin-bottom:4px; }
-  .log-type { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
-  .log-memo { font-size:12px; color:var(--text2); line-height:1.6; }
-  .log-delete {
-    position:absolute; top:10px; right:10px; background:none; border:none;
-    color:var(--text2); font-size:16px; cursor:pointer; opacity:0.4; padding:4px;
-  }
-  .log-delete:hover { opacity:1; color:var(--accent1); }
+/* 日報履歴一覧 */
+.history-sec{margin-top:20px;border-top:2px solid var(--border);padding-top:14px;}
+.history-sec-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+.hist-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.hist-card:hover{border-color:var(--accent);}
+.hist-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.hist-date{font-size:13px;font-weight:600;color:var(--text);}
+.hist-cnt{font-size:12px;color:var(--accent);font-weight:600;}
+.hist-summary{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:4px;}
+.hist-detail{display:none;margin-top:6px;border-top:1px solid var(--border);padding-top:6px;}
+.hist-detail.open{display:block;}
+.hist-vrow{font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);line-height:1.5;}
+.hist-vrow:last-child{border-bottom:none;}
+.hist-fname{font-weight:600;color:var(--text);}
 
-  .log-empty {
-    text-align:center; padding:40px 20px; color:var(--text2); font-size:13px;
-  }
-  .log-empty .icon { font-size:36px; margin-bottom:12px; opacity:0.4; }
+/* 報告タブ */
+.report-wrap{flex:1;overflow-y:auto;padding:12px 16px;display:none;}
+.report-wrap.show{display:block;}
+.rep-form{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+.rep-form-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;}
+.rep-field{margin-bottom:10px;}
+.rep-field label{display:block;font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}
+.rep-field input,.rep-field textarea,.rep-field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--text);font-family:'Noto Sans JP',sans-serif;outline:none;}
+.rep-field input:focus,.rep-field textarea:focus,.rep-field select:focus{border-color:var(--accent);}
+.rep-field textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.rep-sug{background:var(--surface);border:1px solid var(--border);border-radius:4px;max-height:130px;overflow-y:auto;display:none;margin-top:2px;}
+.rep-sug-item{padding:7px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);}
+.rep-sug-item:hover{background:var(--surface2);}
+.rep-history{margin-top:16px;}
+.rep-history-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;border-top:2px solid var(--border);padding-top:14px;}
+.rep-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:8px;position:relative;}
+.rep-card-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.rep-card-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.rep-card-name{font-size:13px;font-weight:600;color:var(--accent);}
+.rep-card-body{font-size:13px;color:var(--text);line-height:1.6;}
+.rep-del{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;}
+.rep-del:hover{color:var(--red);}
+.copy-btn{position:absolute;top:8px;right:32px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px;}
+.copy-btn:hover{color:var(--accent);}
+.copy-all-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:12px;font-family:'Noto Sans JP',sans-serif;margin-bottom:10px;transition:all .15s;}
+.copy-all-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-  /* FAB */
-  .fab {
-    position:fixed; bottom:24px; right:20px; z-index:200;
-    width:56px; height:56px; border-radius:50%; border:none;
-    background: linear-gradient(135deg, var(--accent2), #45b7aa);
-    color:#fff; font-size:28px; cursor:pointer;
-    box-shadow: 0 4px 20px rgba(78,205,196,0.4);
-    transition: transform 0.2s; display:flex; align-items:center; justify-content:center;
-  }
-  .fab:active { transform:scale(0.92); }
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;width:460px;max-width:92vw;max-height:88vh;overflow-y:auto;}
+.modal h3{font-size:15px;margin-bottom:14px;}
+.modal-actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;}
 
-  /* Modal */
-  .modal-overlay {
-    display:none; position:fixed; inset:0; z-index:300;
-    background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
-    align-items:flex-end; justify-content:center;
-  }
-  .modal-overlay.active { display:flex; }
-  .modal {
-    background:var(--surface); border-radius: 20px 20px 0 0; width:100%; max-width:480px;
-    max-height:85dvh; overflow-y:auto; padding:20px 20px 40px;
-    animation: slideUp 0.3s ease;
-  }
-  @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+/* EMPTY / TOAST */
+.empty{text-align:center;padding:50px 20px;color:var(--text3);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.toast{position:fixed;bottom:20px;right:20px;z-index:300;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:13px;transform:translateY(80px);transition:transform .3s;}
+.toast.show{transform:translateY(0);}
+.toast.ok{border-color:var(--green);}
+.toast.err{border-color:var(--red);}
 
-  .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-  .modal-title { font-size:16px; font-weight:600; }
-  .modal-close {
-    background:var(--surface3); border:none; color:var(--text2); width:32px; height:32px;
-    border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;
-  }
+/* KPI VIEW */
+.kpi-wrap{flex:1;overflow:hidden;display:none;flex-direction:column;}
+.kpi-wrap.show{display:flex;}
+.kpi-card-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+@media(max-width:768px){.kpi-card-row{grid-template-columns:1fr;}}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;border-left:3px solid;}
+.kpi-card.kc1{border-left-color:#dc2626;} .kpi-card.kc2{border-left-color:#2563eb;} .kpi-card.kc3{border-left-color:#d97706;}
+.kpi-card-title{font-size:12px;font-weight:600;margin-bottom:4px;}
+.kpi-card-target{font-size:10px;color:var(--text3);margin-bottom:8px;}
+.kpi-card-num{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;}
+.kpi-card-num.kc1{color:#dc2626;} .kpi-card-num.kc2{color:#2563eb;} .kpi-card-num.kc3{color:#d97706;}
+.kpi-bar{height:4px;background:var(--surface2);border-radius:2px;margin-top:6px;overflow:hidden;}
+.kpi-bar-fill{height:100%;border-radius:2px;transition:width .5s ease;}
+.kpi-bar-fill.kc1{background:#dc2626;} .kpi-bar-fill.kc2{background:#2563eb;} .kpi-bar-fill.kc3{background:#d97706;}
+.kpi-week-bars{display:flex;gap:2px;align-items:flex-end;height:28px;margin-top:6px;}
+.kpi-week-bar{flex:1;border-radius:2px 2px 0 0;min-height:2px;}
+.kpi-log-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;position:relative;}
+.kpi-log-cat{font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;display:inline-block;}
+.kpi-log-cat.kc1{background:#fee2e2;color:#dc2626;} .kpi-log-cat.kc2{background:#dbeafe;color:#1d4ed8;} .kpi-log-cat.kc3{background:#fef3c7;color:#d97706;}
+.kpi-log-fac{font-size:13px;font-weight:500;margin-top:4px;}
+.kpi-log-type{font-size:11px;color:var(--text2);margin-top:2px;}
+.kpi-log-memo{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5;}
+.kpi-log-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.kpi-log-del{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;}
+.kpi-log-del:hover{color:var(--red);}
+.kpi-actions{display:flex;gap:8px;margin-bottom:12px;}
 
-  .form-group { margin-bottom: 16px; }
-  .form-label { font-size:12px; font-weight:500; color:var(--text2); margin-bottom:8px; display:block; }
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-  .cat-select { display:flex; gap:8px; }
-  .cat-btn {
-    flex:1; padding:12px 8px; border-radius:10px; border:2px solid var(--surface3);
-    background:var(--surface2); color:var(--text2); cursor:pointer;
-    font-size:12px; font-weight:500; text-align:center; transition:all 0.2s;
-    font-family:'Noto Sans JP',sans-serif;
-  }
-  .cat-btn.active.cat1 { border-color:var(--cat1); background:var(--cat1bg); color:var(--cat1); }
-  .cat-btn.active.cat2 { border-color:var(--cat2); background:var(--cat2bg); color:var(--cat2); }
-  .cat-btn.active.cat3 { border-color:var(--cat3); background:var(--cat3bg); color:var(--cat3); }
-
-  /* Sub-type chips */
-  .type-select { display:flex; flex-wrap:wrap; gap:6px; }
-  .type-chip {
-    padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--surface3);
-    background: var(--surface2); color: var(--text2); cursor: pointer;
-    font-size: 12px; transition: all 0.2s; font-family:'Noto Sans JP',sans-serif;
-  }
-  .type-chip.active { border-color: var(--accent2); background: rgba(78,205,196,0.1); color: var(--accent2); }
-
-  input[type="text"], input[type="date"], textarea, select {
-    width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--surface3);
-    background:var(--surface2); color:var(--text); font-size:14px;
-    font-family:'Noto Sans JP',sans-serif; outline:none; transition:border 0.2s;
-  }
-  input:focus, textarea:focus, select:focus { border-color:var(--accent2); }
-  textarea { resize:vertical; min-height:80px; }
-
-  .btn-submit {
-    width:100%; padding:14px; border-radius:12px; border:none;
-    background: linear-gradient(135deg, var(--accent2), #45b7aa);
-    color:#fff; font-size:15px; font-weight:600; cursor:pointer;
-    font-family:'Noto Sans JP',sans-serif;
-    transition: opacity 0.2s; margin-top:8px;
-  }
-  .btn-submit:active { opacity:0.8; }
-
-  /* Summary */
-  .summary-section { margin-top:16px; }
-  .summary-title { font-size:14px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-  .summary-table {
-    width:100%; border-collapse:collapse; background:var(--surface); border-radius:var(--radius); overflow:hidden;
-  }
-  .summary-table th {
-    background:var(--surface2); padding:10px 12px; font-size:11px; font-weight:600;
-    text-align:left; color:var(--text2);
-  }
-  .summary-table td { padding:10px 12px; font-size:13px; border-top:1px solid var(--surface3); }
-  .summary-table .num { font-family:'JetBrains Mono',monospace; font-weight:500; text-align:center; }
-
-  .review-area {
-    background:var(--surface); border-radius:var(--radius); padding:16px; margin-top:16px;
-  }
-  .review-area label { font-size:12px; color:var(--text2); display:block; margin-bottom:8px; }
-  .review-area textarea { min-height:100px; }
-  .review-save {
-    margin-top:10px; padding:10px 20px; border-radius:8px; border:none;
-    background:var(--accent2); color:#fff; font-size:13px; font-weight:500;
-    cursor:pointer; font-family:'Noto Sans JP',sans-serif;
-  }
-
-  /* Settings */
-  .settings-section { margin-top:16px; }
-  .settings-btn {
-    width:100%; padding:14px 16px; border-radius:var(--radius); border:none;
-    background:var(--surface); color:var(--text); font-size:14px; text-align:left;
-    cursor:pointer; margin-bottom:8px; display:flex; align-items:center; gap:12px;
-    font-family:'Noto Sans JP',sans-serif;
-  }
-  .settings-btn .icon { font-size:20px; }
-  .settings-btn .label { flex:1; }
-  .settings-btn .arrow { color:var(--text2); }
-  .settings-btn:active { background:var(--surface2); }
-  .settings-btn.danger { color:var(--accent1); }
-
-  .facility-list { margin-top: 12px; }
-  .facility-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px; background: var(--surface); border-radius: 10px; margin-bottom: 6px;
-    font-size: 13px;
-  }
-  .facility-del { background:none; border:none; color:var(--text2); cursor:pointer; font-size:16px; padding:4px; }
-  .facility-add-row { display:flex; gap:8px; margin-top:8px; }
-  .facility-add-row input { flex:1; }
-  .facility-add-row button {
-    padding:10px 16px; border-radius:10px; border:none;
-    background:var(--accent2); color:#fff; font-weight:500; cursor:pointer;
-    font-family:'Noto Sans JP',sans-serif; font-size:13px; white-space:nowrap;
-  }
-
-  /* Weekly bar mini chart */
-  .week-bars { display:flex; gap:4px; align-items:flex-end; height:40px; margin-top:8px; }
-  .week-bar {
-    flex:1; border-radius:3px 3px 0 0; min-height:3px; transition:height 0.4s ease;
-  }
-  .week-label { display:flex; gap:4px; margin-top:2px; }
-  .week-label span { flex:1; text-align:center; font-size:8px; color:var(--text2); font-family:'JetBrains Mono',monospace; }
-
-  /* Toast */
-  .toast {
-    position:fixed; bottom:100px; left:50%; transform:translateX(-50%);
-    background:var(--surface2); color:var(--text); padding:10px 20px;
-    border-radius:10px; font-size:13px; z-index:400; opacity:0;
-    transition:opacity 0.3s; pointer-events:none; box-shadow:var(--shadow);
-    border:1px solid var(--surface3);
-  }
-  .toast.show { opacity:1; }
-
-  /* PDF hidden */
-  @media print {
-    body { background:#fff; color:#000; padding:20px; }
-    .header, .tab-bar, .fab, .modal-overlay, .toast { display:none !important; }
-    .panel { display:block !important; }
-    .kpi-card { border:1px solid #ddd; }
-  }
+/* MOBILE */
+@media(max-width:768px){
+  .hdr{padding:0 14px;}
+  .hdr-bk{display:none!important;}
+  .hstats{display:none;}
+  .main{flex-direction:column;padding-bottom:calc(60px + env(safe-area-inset-bottom));}
+  .sidebar{position:fixed;left:-260px;top:96px;bottom:calc(60px + env(safe-area-inset-bottom));width:260px;min-width:260px;z-index:90;transition:left .25s;height:auto;}
+  .sidebar.open{left:0;box-shadow:4px 0 20px rgba(0,0,0,.12);}
+  .sb-overlay{position:fixed;inset:0;top:96px;bottom:calc(60px + env(safe-area-inset-bottom));background:rgba(0,0,0,.25);z-index:89;display:none;}
+  .sb-overlay.show{display:block;}
+  .content{width:100%;}
+  .dpanel{position:fixed;inset:0;top:96px;bottom:calc(60px + env(safe-area-inset-bottom));width:100%!important;min-width:0!important;z-index:80;transform:translateX(100%);transition:transform .25s;}
+  .dpanel:not(.hide){transform:translateX(0);}
+  .dpanel.hide{transform:translateX(100%)!important;width:100%!important;}
+  .daily-wrap,.report-wrap{width:100%;}
+  .sbox{max-width:none;}
+  .rcount{display:none;}
+  .bnav{display:flex!important;position:fixed;bottom:0;left:0;right:0;height:calc(60px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);z-index:100;align-items:flex-start;padding-top:8px;}
+  .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:var(--text3);font-size:10px;border:none;background:none;font-family:'Noto Sans JP',sans-serif;}
+  .bnav-item.on{color:var(--accent);}
+  .bnav-item span{font-size:20px;line-height:1;}
+}
+.bnav{display:none;}
+.sb-overlay{display:none;}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-top">
-    <div>
-      <h1>KPI Action Tracker</h1>
-      <div class="header-sub">FY09下期 アクションプラン</div>
-    </div>
-    <div class="month-nav">
-      <button onclick="changeMonth(-1)">‹</button>
-      <span id="monthLabel"></span>
-      <button onclick="changeMonth(1)">›</button>
-    </div>
+<div class="hdr">
+  <div class="logo">MedSales</div>
+  <div class="hstats">
+    <div class="hs">施設数 <b id="hTotal">—</b></div>
+    <div class="hs">訪問済 <b id="hVisited">—</b></div>
+    <div class="hs">CA <b id="hCA">—</b></div>
   </div>
+  <button class="btn hdr-bk" onclick="exportBackup()" style="margin-left:auto" title="全データをバックアップ">💾 バックアップ</button>
+  <button class="btn hdr-bk" onclick="document.getElementById('importFile').click()" title="バックアップから復元">📂 復元</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(this)">
+  <button class="btn pri" onclick="openAddModal()">＋ 施設追加</button>
 </div>
 
-<div class="tab-bar">
-  <button class="tab active" data-tab="log" onclick="switchTab('log')">📋 ログ</button>
-  <button class="tab" data-tab="summary" onclick="switchTab('summary')">📊 サマリー</button>
-  <button class="tab" data-tab="settings" onclick="switchTab('settings')">⚙️ 設定</button>
-</div>
+<div class="tabs" id="tabBar"></div>
 
-<div class="content">
-  <!-- LOG PANEL -->
-  <div class="panel active" id="panel-log">
-    <div class="kpi-cards" id="kpiCards"></div>
-    <div id="logList"></div>
-  </div>
-
-  <!-- SUMMARY PANEL -->
-  <div class="panel" id="panel-summary">
-    <div class="summary-section">
-      <div class="summary-title">📊 月間実績サマリー</div>
-      <table class="summary-table" id="summaryTable"></table>
-    </div>
-    <div class="summary-section">
-      <div class="summary-title">📈 週別推移</div>
-      <div id="weeklyChart"></div>
-    </div>
-    <div class="review-area">
-      <label>📝 活動振り返り（自身の活動）</label>
-      <textarea id="reviewOwn" placeholder="今月の自身の活動を振り返り..."></textarea>
-      <label style="margin-top:12px;">🤝 他社協業</label>
-      <textarea id="reviewCollab" placeholder="他社協業の状況..."></textarea>
-      <label style="margin-top:12px;">📋 来月の活動計画</label>
-      <textarea id="reviewNext" placeholder="来月やること..."></textarea>
-      <button class="review-save" onclick="saveReview()">振り返りを保存</button>
-    </div>
-  </div>
-
-  <!-- SETTINGS PANEL -->
-  <div class="panel" id="panel-settings">
-    <div class="settings-section">
-      <div class="summary-title">🏥 施設リスト管理</div>
-      <div class="facility-list" id="facilityList"></div>
-      <div class="facility-add-row">
-        <input type="text" id="newFacility" placeholder="施設名を入力">
-        <button onclick="addFacility()">追加</button>
-      </div>
-    </div>
-    <div class="settings-section" style="margin-top:24px;">
-      <div class="summary-title">💾 データ管理</div>
-      <button class="settings-btn" onclick="exportJSON()">
-        <span class="icon">📤</span><span class="label">JSONエクスポート</span><span class="arrow">›</span>
-      </button>
-      <button class="settings-btn" onclick="document.getElementById('importFile').click()">
-        <span class="icon">📥</span><span class="label">JSONインポート</span><span class="arrow">›</span>
-      </button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
-      <button class="settings-btn" onclick="exportPDF()">
-        <span class="icon">📄</span><span class="label">サマリーPDF出力</span><span class="arrow">›</span>
-      </button>
-      <button class="settings-btn danger" onclick="confirmClear()">
-        <span class="icon">🗑️</span><span class="label">当月データをクリア</span><span class="arrow">›</span>
-      </button>
-    </div>
-    <div class="settings-section" style="margin-top:24px;">
-      <div class="summary-title">ℹ️ アプリ情報</div>
-      <div style="font-size:12px;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);line-height:1.8;">
-        KPI Action Tracker v1.0<br>
-        データはこの端末のブラウザに保存されます。<br>
-        定期的にJSONエクスポートでバックアップを取ってください。<br>
-        ホーム画面に追加すると、アプリのように使えます。
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-sec">絞り込み</div>
+    <div class="filter-area">
+      <div class="fg"><div class="fl">ランク</div><div class="chips" id="rankChips"></div></div>
+      <div class="fg"><div class="fl">機種</div><div class="chips" id="modelChips"></div></div>
+      <div class="fg">
+        <div class="fl">メモあり</div>
+        <div class="chips">
+          <span class="chip" onclick="toggleF('hasMemo','有',this)">メモ有り</span>
+          <span class="chip" onclick="toggleF('hasMemo','無',this)">メモ無し</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- リストビュー -->
+  <div class="content" id="listView">
+    <div class="toolbar">
+      <div class="sbox">
+        <span style="color:var(--text3)">🔍</span>
+        <input type="text" id="searchInput" placeholder="施設名・エリア・メモで検索…" oninput="render()">
+      </div>
+      <select id="sortSel" onchange="render()" class="btn" style="cursor:pointer">
+        <option value="default">並び順: 既定</option>
+        <option value="pref_area">エリア順</option>
+        <option value="pref_rank">ランク順</option>
+        <option value="name">施設名順</option>
+      </select>
+      <button class="btn" onclick="exportCSV()">⬇ CSV</button>
+      <div class="rcount" id="rcount"></div>
+    </div>
+    <div class="flist" id="facilityList"></div>
+  </div>
+
+  <!-- 日報ビュー -->
+  <div class="content daily-wrap" id="dailyView">
+    <div class="dnav">
+      <button class="dnav-btn" onclick="dChangeDate(-1)">‹</button>
+      <div class="dnav-label" id="dDateLabel"></div>
+      <button class="dnav-btn" onclick="dChangeDate(1)">›</button>
+      <button class="btn" onclick="dChangeDate(0)" style="font-size:11px;padding:5px 10px">今日</button>
+    </div>
+    <div class="dsum-box">
+      <label>📝 今日のまとめ・所感</label>
+      <textarea id="dSummary" placeholder="今日の営業活動の所感を入力…" oninput="saveDaySummary()"></textarea>
+    </div>
+    <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">訪問記録</div>
+    <div id="dVisitList"></div>
+    <div class="dadd-row">
+      <button class="dbtn-manual" onclick="openDailyModal()">＋ 手入力で追加</button>
+      <button class="dbtn-voice" id="dVoiceBtn" onclick="toggleDailyVoice()">🎤 音声で追加</button>
+      <div class="vprev" id="dVoicePrev">
+        <div id="dVoiceText"></div>
+        <div class="vactions" id="dVoiceActions" style="display:none">
+          <button class="btn pri" onclick="applyDailyVoice()">✓ 追加</button>
+          <button class="btn" onclick="cancelDailyVoice()">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 過去の日報一覧 -->
+    <div class="history-sec">
+      <div class="history-sec-title">過去の日報一覧</div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- 報告ビュー -->
+  <div class="content report-wrap" id="reportView">
+    <div class="rep-form">
+      <div class="rep-form-title">✏️ 訪問記録を追加</div>
+      <div class="rep-field">
+        <label>日付</label>
+        <input type="date" id="repDate">
+      </div>
+      <div class="rep-field">
+        <label>施設名</label>
+        <input type="text" id="repFacility" placeholder="施設名を入力" oninput="repUpdateSuggest()" autocomplete="off">
+        <div class="rep-sug" id="repSuggest"></div>
+      </div>
+      <div class="rep-field">
+        <label>訪問内容</label>
+        <textarea id="repContent" placeholder="訪問内容を入力…"></textarea>
+      </div>
+      <button class="btn pri" style="width:100%;justify-content:center" onclick="saveReport()">保存</button>
+    </div>
+    <div class="rep-history">
+      <div class="rep-history-title">報告履歴</div>
+      <div id="repHistoryList"></div>
+    </div>
+  </div>
+
+  <!-- KPIビュー -->
+  <div class="content kpi-wrap" id="kpiView">
+    <div class="toolbar" style="justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="btn" onclick="kpiChangeMonth(-1)">‹</button>
+        <span id="kpiMonthLabel" style="font-size:14px;font-weight:600;min-width:80px;text-align:center;"></span>
+        <button class="btn" onclick="kpiChangeMonth(1)">›</button>
+      </div>
+      <button class="btn pri" onclick="openKpiModal()">＋ 活動記録</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:12px 16px;" id="kpiContent">
+      <!-- KPI cards and log injected here -->
+    </div>
+  </div>
+
+  <!-- KPI追加モーダル -->
+  <div class="overlay" id="kpiModal">
+    <div class="modal">
+      <h3>KPI活動を記録</h3>
+      <div style="margin-bottom:12px;">
+        <div class="fl" style="margin-bottom:6px">カテゴリ</div>
+        <div class="chips" id="kpiCatChips" style="gap:6px;">
+          <span class="chip" onclick="kpiSelectCat('案件創出',this)" style="padding:6px 12px;font-size:12px">案件創出</span>
+          <span class="chip" onclick="kpiSelectCat('案件進展',this)" style="padding:6px 12px;font-size:12px">案件進展</span>
+          <span class="chip" onclick="kpiSelectCat('予算申請',this)" style="padding:6px 12px;font-size:12px">予算申請</span>
+        </div>
+      </div>
+
+      <div class="rep-field" style="margin-bottom:10px">
+        <label>日付</label>
+        <input type="date" id="kpi-date">
+      </div>
+      <div class="rep-field" style="margin-bottom:10px">
+        <label>施設名</label>
+        <input type="text" id="kpi-facility" placeholder="施設名を入力" list="kpiFacDL" autocomplete="off">
+        <datalist id="kpiFacDL"></datalist>
+      </div>
+      <div id="kpiNewFacArea" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px;">🏥 新規施設として登録</div>
+        <div class="igrid" style="margin-bottom:0">
+          <div class="iitem"><label>都道府県</label><input id="kpi-new-pref" placeholder="東京"></div>
+          <div class="iitem"><label>エリア</label><input id="kpi-new-area" placeholder="新宿"></div>
+          <div class="iitem"><label>機種</label>
+            <select id="kpi-new-model"><option value="">—</option><option>Fuji</option><option>オリ</option><option>不明</option><option>その他</option></select>
+          </div>
+          <div class="iitem"><label>ランク</label>
+            <select id="kpi-new-rank"><option value="">—</option><option>CA</option><option>CB</option><option>HA</option><option>HB</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="rep-field" style="margin-bottom:10px">
+        <label>メモ（任意）</label>
+        <textarea id="kpi-memo" placeholder="活動内容の詳細…" style="min-height:60px"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('kpiModal')">キャンセル</button>
+        <button class="btn pri" onclick="saveKpiEntry()">記録</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIサマリーモーダル -->
+  <div class="overlay" id="kpiSummaryModal">
+    <div class="modal" style="max-width:560px">
+      <h3>📊 月間サマリー・振り返り</h3>
+      <div id="kpiSummaryContent"></div>
+      <div class="rep-field" style="margin-top:12px">
+        <label>📝 自身の活動振り返り</label>
+        <textarea id="kpiReviewOwn" placeholder="今月の活動を振り返り…"></textarea>
+      </div>
+      <div class="rep-field" style="margin-top:8px">
+        <label>🤝 他社協業</label>
+        <textarea id="kpiReviewCollab" placeholder="他社協業の状況…"></textarea>
+      </div>
+      <div class="rep-field" style="margin-top:8px">
+        <label>📋 来月の活動計画</label>
+        <textarea id="kpiReviewNext" placeholder="来月やること…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="kpiExportPDF()">📄 PDF出力</button>
+        <button class="btn pri" onclick="kpiSaveReview();closeModal('kpiSummaryModal')">保存して閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="dpanel hide" id="detailPanel">
+    <div class="dhdr">
+      <div>
+        <div class="dname" id="dName"></div>
+        <div class="dtags" id="dTags"></div>
+      </div>
+      <button class="xbtn" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="dbody">
+      <div class="dsec">
+        <div class="dsec-t">基本情報</div>
+        <div class="igrid">
+          <div class="iitem"><label>都道府県</label><input id="d-pref" onchange="saveDet('prefecture',this.value)"></div>
+          <div class="iitem"><label>エリア</label><input id="d-area" onchange="saveDet('area',this.value)"></div>
+          <div class="iitem"><label>機種</label>
+            <select id="d-model" onchange="saveDet('model',this.value)">
+              <option>Fuji</option><option>オリ</option><option>不明</option><option>その他</option><option value=""></option>
+            </select>
+          </div>
+          <div class="iitem"><label>ランク</label>
+            <select id="d-rank" onchange="saveDet('rank',this.value)">
+              <option value="">—</option><option>CA</option><option>CB</option><option>HA</option><option>HB</option><option>検診C</option>
+            </select>
+          </div>
+          <div class="iitem"><label>休診日</label><input id="d-holiday" onchange="saveDet('holiday',this.value)"></div>
+          <div class="iitem"><label>休診AM/PM</label><input id="d-holiday_ampm" onchange="saveDet('holiday_ampm',this.value)"></div>
+          <div class="iitem"><label>AM終了</label><input id="d-am_end" onchange="saveDet('am_end',this.value)" placeholder="12:00"></div>
+          <div class="iitem"><label>PM終了</label><input id="d-pm_end" onchange="saveDet('pm_end',this.value)" placeholder="18:00"></div>
+        </div>
+      </div>
+      <div class="dsec">
+        <div class="dsec-t">備考メモ</div>
+        <textarea class="mtarea" id="d-memo" onchange="saveDet('memo',this.value)"></textarea>
+      </div>
+      <div class="dsec">
+        <div class="dsec-t">訪問記録</div>
+        <div class="vlog" id="visitLogList"></div>
+      </div>
+    </div>
+    <div class="vsec">
+      <button class="vbtn" id="voiceBtn" onclick="toggleVoice()">🎤 音声で訪問記録を追加</button>
+      <div class="vprev" id="voicePreview">
+        <div id="voiceText"></div>
+        <div class="vactions" id="voiceActions" style="display:none">
+          <button class="btn pri" onclick="applyVoice()">✓ 記録に追加</button>
+          <button class="btn" onclick="cancelVoice()">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<button class="fab" onclick="openModal()">＋</button>
-
-<!-- ADD ENTRY MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModalBg(event)">
+<!-- 施設追加モーダル -->
+<div class="overlay" id="addModal">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">活動を記録</span>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">カテゴリ</label>
-      <div class="cat-select">
-        <button class="cat-btn cat1" data-cat="案件創出" onclick="selectCat(this)">案件創出</button>
-        <button class="cat-btn cat2" data-cat="案件進展" onclick="selectCat(this)">案件進展</button>
-        <button class="cat-btn cat3" data-cat="予算申請" onclick="selectCat(this)">予算申請</button>
+    <h3>施設を追加</h3>
+    <div class="igrid" style="margin-bottom:10px">
+      <div class="iitem" style="grid-column:1/-1"><label>施設名 *</label><input id="new-name" placeholder="クリニック名"></div>
+      <div class="iitem"><label>都道府県</label><input id="new-pref" placeholder="茨城"></div>
+      <div class="iitem"><label>エリア</label><input id="new-area" placeholder="水戸"></div>
+      <div class="iitem"><label>機種</label>
+        <select id="new-model"><option>Fuji</option><option>オリ</option><option>不明</option><option>その他</option></select>
+      </div>
+      <div class="iitem"><label>ランク</label>
+        <select id="new-rank"><option value="">—</option><option>CA</option><option>CB</option><option>HA</option><option>HB</option></select>
+      </div>
+      <div class="iitem" style="grid-column:1/-1"><label>メモ</label>
+        <textarea class="mtarea" id="new-memo" style="min-height:50px"></textarea>
       </div>
     </div>
-    <div class="form-group" id="typeGroup" style="display:none;">
-      <label class="form-label">活動タイプ</label>
-      <div class="type-select" id="typeSelect"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('addModal')">キャンセル</button>
+      <button class="btn pri" onclick="addFacility()">追加</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">日付</label>
-      <input type="date" id="entryDate">
-    </div>
-    <div class="form-group">
-      <label class="form-label">施設名</label>
-      <input type="text" id="entryFacility" list="facilityDatalist" placeholder="施設名を入力または選択">
-      <datalist id="facilityDatalist"></datalist>
-    </div>
-    <div class="form-group">
-      <label class="form-label">メモ（任意）</label>
-      <textarea id="entryMemo" placeholder="活動内容の詳細..."></textarea>
-    </div>
-    <button class="btn-submit" onclick="saveEntry()">記録する</button>
   </div>
 </div>
 
+<!-- 日報追加モーダル -->
+<div class="overlay" id="dailyModal">
+  <div class="modal">
+    <h3>訪問を追加</h3>
+    <div class="rep-field" style="margin-bottom:8px">
+      <label>日付</label>
+      <input type="date" id="dm-date">
+    </div>
+    <div class="rep-field" style="margin-bottom:8px">
+      <label>施設名</label>
+      <input type="text" id="dm-facility" placeholder="施設名を入力" oninput="dmUpdateSuggest()" autocomplete="off">
+      <div class="rep-sug" id="dmSuggest"></div>
+    </div>
+    <div class="rep-field" style="margin-bottom:8px">
+      <label>訪問内容</label>
+      <textarea id="dm-content" style="width:100%;height:90px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:7px;font-size:13px;color:var(--text);outline:none;resize:vertical;font-family:'Noto Sans JP',sans-serif" placeholder="訪問内容を入力…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('dailyModal')">キャンセル</button>
+      <button class="btn pri" onclick="saveDailyVisit()">追加</button>
+    </div>
+  </div>
+</div>
+
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+<div class="bnav" id="bnav">
+  <button class="bnav-item on" id="bn-list" onclick="bnav('list')"><span>📋</span>リスト</button>
+  <button class="bnav-item" id="bn-daily" onclick="bnav('daily')"><span>📅</span>日報</button>
+  <button class="bnav-item" id="bn-report" onclick="bnav('report')"><span>📊</span>報告</button>
+  <button class="bnav-item" id="bn-kpi" onclick="bnav('kpi')"><span>🎯</span>KPI</button>
+  <button class="bnav-item" id="bn-add" onclick="openAddModal()"><span>＋</span>追加</button>
+  <button class="bnav-item" onclick="showBkMenu()"><span>💾</span>保存</button>
+</div>
+<div class="overlay" id="bkMenu">
+  <div class="modal" style="max-width:320px">
+    <h3>💾 データの保存・復元</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.7">バックアップはJSONファイルで保存されます。別の端末に移したいときは、このファイルを送って「復元」してください。</p>
+    <button class="btn pri" style="width:100%;justify-content:center;margin-bottom:8px" onclick="exportBackup();closeModal('bkMenu')">💾 バックアップを保存</button>
+    <button class="btn" style="width:100%;justify-content:center;margin-bottom:8px" onclick="document.getElementById('importFile').click();closeModal('bkMenu')">📂 バックアップから復元</button>
+    <button class="btn" style="width:100%;justify-content:center" onclick="closeModal('bkMenu')">キャンセル</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── State ─────────────────────
-let currentMonth = new Date().toISOString().slice(0,7); // "YYYY-MM"
-let selectedCat = null;
-let selectedType = null;
+// ===== DATA =====
+const INITIAL_DATA = [];
 
-const CATEGORIES = {
-  '案件創出': { color:'cat1', kpi:'週5件の新規案件創出活動', targetPerWeek:5 },
-  '案件進展': { color:'cat2', kpi:'週2件の案件フェーズの進展', targetPerWeek:2 },
-  '予算申請': { color:'cat3', kpi:'8月までに予算申請可能施設を3件', targetTotal:3 },
-};
+const INITIAL_REPORT_DATA = [];
+const INITIAL_DAILY_DATA = {};
+let facilities = [];
+let visitLogs = {};   // { id: [{date,content},...] }
+let dailyData = {};   // { "YYYY/MM/DD": {summary, visits:[{name,content},...]} }
+let reportData = [];  // [{id,date,facilityName,content},...] 報告タブ用
+let nextId = 3000;
+let nextRepId = 1;
+let selId = null;
+let activeFilters = {};
+let activePref = '全県';
+let activeView = 'list';
+let dCurrentDate = todayStr();
 
-const ACTIVITY_TYPES = {
-  '案件創出': ['新規訪問','電話アプローチ','紹介依頼','セミナー集客','Web問合せ対応','他社協業','その他'],
-  '案件進展': ['デモ実施','見積提出','トライアル','院内検討会','フォロー訪問','他社協業','その他'],
-  '予算申請': ['予算ヒアリング','申請書作成支援','事務方面談','院長面談','他社協業','その他'],
-};
+// 音声
+let voiceRec = null, isVoiceRec = false, voiceText = '';
+let dVoiceRec = null, isDVoiceRec = false, dVoiceText = '';
 
-// ─── Storage helpers ─────────────────────
-function storageKey(month) { return `kpi_entries_${month}`; }
-function getEntries(month) {
-  try { return JSON.parse(localStorage.getItem(storageKey(month))) || []; }
-  catch { return []; }
+// ===== UTILS =====
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '/' + pad(d.getMonth()+1) + '/' + pad(d.getDate());
 }
-function setEntries(month, entries) {
-  localStorage.setItem(storageKey(month), JSON.stringify(entries));
+function pad(n) { return String(n).padStart(2,'0'); }
+function dateInputVal() {
+  const d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
 }
-function getReview(month) {
-  try { return JSON.parse(localStorage.getItem(`kpi_review_${month}`)) || {}; }
-  catch { return {}; }
+function inputToSlash(s) { return s ? s.replace(/-/g, '/') : todayStr(); }
+
+// ===== STORAGE =====
+function loadAll() {
+  const sf = localStorage.getItem('ms_facilities');
+  const sl = localStorage.getItem('ms_visitlogs');
+  const sd = localStorage.getItem('ms_daily');
+  const sr = localStorage.getItem('ms_report');
+  facilities = sf ? JSON.parse(sf) : JSON.parse(JSON.stringify(INITIAL_DATA));
+  visitLogs  = sl ? JSON.parse(sl) : {};
+  dailyData  = sd ? JSON.parse(sd) : JSON.parse(JSON.stringify(INITIAL_DAILY_DATA));
+  reportData = sr ? JSON.parse(sr) : JSON.parse(JSON.stringify(INITIAL_REPORT_DATA));
+  if (!sf) localStorage.setItem('ms_facilities', JSON.stringify(facilities));
+  if (!sd) localStorage.setItem('ms_daily', JSON.stringify(dailyData));
+  if (!sr) localStorage.setItem('ms_report', JSON.stringify(reportData));
+  nextId = Math.max(...facilities.map(f=>f.id), 2999) + 1;
+  nextRepId = reportData.length ? Math.max(...reportData.map(r=>r.id||0)) + 1 : 1;
 }
-function setReview(month, data) {
-  localStorage.setItem(`kpi_review_${month}`, JSON.stringify(data));
-}
-function getFacilities() {
-  try { return JSON.parse(localStorage.getItem('kpi_facilities')) || []; }
-  catch { return []; }
-}
-function setFacilities(list) { localStorage.setItem('kpi_facilities', JSON.stringify(list)); }
+function saveF()  { localStorage.setItem('ms_facilities', JSON.stringify(facilities)); }
+function saveL()  { localStorage.setItem('ms_visitlogs', JSON.stringify(visitLogs)); }
+function saveD()  { localStorage.setItem('ms_daily', JSON.stringify(dailyData)); }
+function saveR()  { localStorage.setItem('ms_report', JSON.stringify(reportData)); }
 
-// ─── Month navigation ─────────────────────
-function changeMonth(delta) {
-  const d = new Date(currentMonth + '-01');
-  d.setMonth(d.getMonth() + delta);
-  currentMonth = d.toISOString().slice(0,7);
-  renderAll();
-}
-
-// ─── Tab switching ─────────────────────
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
-  if (tab === 'summary') renderSummary();
-  if (tab === 'settings') renderFacilities();
-}
-
-// ─── Render all ─────────────────────
-function renderAll() {
-  const [y,m] = currentMonth.split('-');
-  document.getElementById('monthLabel').textContent = `${y}/${m}`;
-  renderKPICards();
-  renderLogList();
+// ===== TABS =====
+function setTab(view, pref, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeView = view;
+  activePref = pref || '全県';
+  document.getElementById('listView').style.display   = view==='list'   ? '' : 'none';
+  document.getElementById('dailyView').classList.toggle('show', view==='daily');
+  document.getElementById('reportView').classList.toggle('show', view==='report');
+  document.getElementById('kpiView').classList.toggle('show', view==='kpi');
+  document.getElementById('detailPanel').classList.add('hide');
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('on'));
+  const bn = document.getElementById('bn-'+view);
+  if (bn) bn.classList.add('on');
+  if (view==='list') { activeFilters={}; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); render(); }
+  if (view==='daily') renderDailyView();
+  if (view==='report') renderReportView();
+  if (view==='kpi') renderKpi();
+  closeSidebar();
 }
 
-// ─── KPI Cards ─────────────────────
-function renderKPICards() {
-  const entries = getEntries(currentMonth);
-  const weeksInMonth = getWeeksInMonth(currentMonth);
-  let html = '';
-
-  for (const [cat, cfg] of Object.entries(CATEGORIES)) {
-    const count = entries.filter(e => e.category === cat).length;
-    let progress, display, target;
-
-    if (cfg.targetPerWeek) {
-      const totalTarget = cfg.targetPerWeek * weeksInMonth;
-      progress = totalTarget > 0 ? Math.min(count / totalTarget * 100, 100) : 0;
-      const weeklyAvg = weeksInMonth > 0 ? (count / weeksInMonth).toFixed(1) : 0;
-      display = count;
-      target = `目標: 週${cfg.targetPerWeek}件 (月${totalTarget}件) ／ 週平均 ${weeklyAvg}件`;
-    } else {
-      progress = Math.min(count / cfg.targetTotal * 100, 100);
-      display = count;
-      target = `目標: ${cfg.targetTotal}件 ／ 残り ${Math.max(cfg.targetTotal - count, 0)}件`;
-    }
-
-    // Weekly bars
-    const weekData = getWeeklyData(currentMonth, cat);
-    let barsHtml = '<div class="week-bars">';
-    let labelsHtml = '<div class="week-label">';
-    const maxVal = Math.max(...weekData.map(w=>w.count), 1);
-    weekData.forEach((w,i) => {
-      const h = (w.count / maxVal) * 36 + 4;
-      const c = cfg.color === 'cat1' ? 'var(--cat1)' : cfg.color === 'cat2' ? 'var(--cat2)' : 'var(--cat3)';
-      barsHtml += `<div class="week-bar" style="height:${h}px;background:${c};"></div>`;
-      labelsHtml += `<span>W${i+1}</span>`;
-    });
-    barsHtml += '</div>';
-    labelsHtml += '</div>';
-
-    html += `
-      <div class="kpi-card ${cfg.color}">
-        <div class="kpi-card-title">${cat}</div>
-        <div class="kpi-card-target">${target}</div>
-        <div class="kpi-metric">
-          <span class="kpi-number" style="color:var(--${cfg.color})">${display}</span>
-          <span class="kpi-unit">件</span>
-        </div>
-        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${progress}%;background:var(--${cfg.color})"></div></div>
-        ${barsHtml}${labelsHtml}
-      </div>
-    `;
+function bnav(view) {
+  let target = null;
+  if (view==='list') {
+    target = document.querySelector('#tabBar .tab');
+  } else {
+    target = document.querySelector('#tabBar .tab[data-view="'+view+'"]');
   }
-  document.getElementById('kpiCards').innerHTML = html;
+  if (target) setTab(view, view==='list'?'全県':'', target);
 }
 
-// ─── Log list ─────────────────────
-function renderLogList() {
-  const entries = getEntries(currentMonth).sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
-  if (entries.length === 0) {
-    document.getElementById('logList').innerHTML = `
-      <div class="log-empty">
-        <div class="icon">📝</div>
-        <div>まだ活動記録がありません。<br>＋ボタンで記録を始めましょう</div>
-      </div>`;
-    return;
-  }
-  let html = '';
-  let lastDate = '';
-  entries.forEach(e => {
-    const dateLabel = e.date;
-    if (dateLabel !== lastDate) {
-      const d = new Date(e.date + 'T00:00:00');
-      const dow = ['日','月','火','水','木','金','土'][d.getDay()];
-      html += `<div style="font-size:11px;color:var(--text2);margin-top:16px;margin-bottom:4px;padding-left:4px;">${dateLabel} (${dow})</div>`;
-      lastDate = dateLabel;
-    }
-    const cfg = CATEGORIES[e.category] || { color:'cat1' };
-    html += `
-      <div class="log-entry">
-        <button class="log-delete" onclick="deleteEntry(${e.id})" title="削除">×</button>
-        <div class="log-entry-header">
-          <span class="log-category ${cfg.color}">${e.category}</span>
-          <span class="log-date">${e.date}</span>
-        </div>
-        <div class="log-facility">${escHtml(e.facility)}</div>
-        ${e.type ? `<div class="log-type">🏷️ ${escHtml(e.type)}</div>` : ''}
-        ${e.memo ? `<div class="log-memo">${escHtml(e.memo)}</div>` : ''}
-      </div>
-    `;
+// ===== FILTERS =====
+const RANK_ORDER = {CA:0,CB:1,HA:2,HB:3,'検診C':4,'':5};
+function getPrefectures() {
+  const prefs = [...new Set(facilities.map(f=>f.prefecture).filter(Boolean))];
+  prefs.sort((a,b)=>a.localeCompare(b,'ja'));
+  return prefs;
+}
+
+function prefSuffix(name) {
+  if (name === '東京') return '都';
+  if (name === '北海道') return '';
+  if (name === '大阪' || name === '京都') return '府';
+  return '県';
+}
+
+function buildTabs() {
+  const prefs = getPrefectures();
+  const bar = document.getElementById('tabBar');
+  let html = '<button class="tab'+(activeView==='list'&&activePref==='全県'?' active':'')+'" onclick="setTab(\'list\',\'全県\',this)">全県</button>';
+  prefs.forEach(p => {
+    const suffix = prefSuffix(p);
+    html += '<button class="tab'+(activeView==='list'&&activePref===p?' active':'')+'" onclick="setTab(\'list\',\''+p+'\',this)">'+p+suffix+'</button>';
   });
-  document.getElementById('logList').innerHTML = html;
+  html += '<button class="tab'+(activeView==='daily'?' active':'')+'" data-view="daily" onclick="setTab(\'daily\',\'\',this)">📅 日報</button>';
+  html += '<button class="tab'+(activeView==='report'?' active':'')+'" data-view="report" onclick="setTab(\'report\',\'\',this)">📋 報告</button>';
+  html += '<button class="tab'+(activeView==='kpi'?' active':'')+'" data-view="kpi" onclick="setTab(\'kpi\',\'\',this)">📊 KPI</button>';
+  bar.innerHTML = html;
 }
 
-// ─── Modal ─────────────────────
-function openModal() {
-  selectedCat = null;
-  selectedType = null;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('typeGroup').style.display = 'none';
-  document.getElementById('entryDate').value = new Date().toISOString().slice(0,10);
-  document.getElementById('entryFacility').value = '';
-  document.getElementById('entryMemo').value = '';
-  updateFacilityDatalist();
-  document.getElementById('modalOverlay').classList.add('active');
+function getPrefOrder() {
+  const prefs = getPrefectures();
+  const order = {};
+  prefs.forEach((p,i) => order[p] = i);
+  return order;
 }
-function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
-function closeModalBg(e) { if (e.target === e.currentTarget) closeModal(); }
+const PREF_ORDER_FN = getPrefOrder;
 
-function selectCat(btn) {
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  selectedCat = btn.dataset.cat;
-  selectedType = null;
-
-  // Show activity type chips
-  const types = ACTIVITY_TYPES[selectedCat] || [];
-  const container = document.getElementById('typeSelect');
-  container.innerHTML = types.map(t =>
-    `<button class="type-chip" onclick="selectType(this, '${t}')">${t}</button>`
+function buildChips() {
+  const ranks = ['CA','CB','HA','HB','検診C'];
+  document.getElementById('rankChips').innerHTML = ranks.map(r =>
+    '<span class="chip" onclick="toggleF(\'rank\',\''+r+'\',this)">'+r+'</span>'
   ).join('');
-  document.getElementById('typeGroup').style.display = types.length ? 'block' : 'none';
-}
-
-function selectType(btn, type) {
-  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  selectedType = type;
-}
-
-function saveEntry() {
-  if (!selectedCat) { showToast('カテゴリを選択してください'); return; }
-  const date = document.getElementById('entryDate').value;
-  const facility = document.getElementById('entryFacility').value.trim();
-  if (!facility) { showToast('施設名を入力してください'); return; }
-  if (!date) { showToast('日付を入力してください'); return; }
-
-  const month = date.slice(0,7);
-  const entries = getEntries(month);
-  entries.push({
-    id: Date.now(),
-    category: selectedCat,
-    type: selectedType || '',
-    date, facility,
-    memo: document.getElementById('entryMemo').value.trim()
-  });
-  setEntries(month, entries);
-
-  // Auto-add facility
-  const facs = getFacilities();
-  if (!facs.includes(facility)) { facs.push(facility); setFacilities(facs); }
-
-  if (month === currentMonth) renderAll();
-  closeModal();
-  showToast('✓ 記録しました');
-}
-
-function deleteEntry(id) {
-  if (!confirm('この記録を削除しますか？')) return;
-  const entries = getEntries(currentMonth).filter(e => e.id !== id);
-  setEntries(currentMonth, entries);
-  renderAll();
-  showToast('削除しました');
-}
-
-// ─── Summary ─────────────────────
-function renderSummary() {
-  const entries = getEntries(currentMonth);
-  const weeks = getWeeksInMonth(currentMonth);
-
-  let tableHtml = `<tr><th>アクションプラン</th><th>KPI</th><th>実績</th><th>達成率</th></tr>`;
-  for (const [cat, cfg] of Object.entries(CATEGORIES)) {
-    const count = entries.filter(e => e.category === cat).length;
-    let target, pct;
-    if (cfg.targetPerWeek) {
-      target = cfg.targetPerWeek * weeks;
-      pct = target > 0 ? Math.round(count / target * 100) : 0;
-    } else {
-      target = cfg.targetTotal;
-      pct = Math.round(count / target * 100);
-    }
-    const color = pct >= 100 ? 'var(--accent2)' : pct >= 70 ? 'var(--accent3)' : 'var(--accent1)';
-    tableHtml += `<tr>
-      <td>${cat}</td>
-      <td style="font-size:11px;color:var(--text2)">${cfg.kpi}</td>
-      <td class="num">${count}/${target}</td>
-      <td class="num" style="color:${color};font-weight:600">${pct}%</td>
-    </tr>`;
-  }
-  document.getElementById('summaryTable').innerHTML = tableHtml;
-
-  // Weekly chart per category
-  let chartHtml = '';
-  for (const [cat, cfg] of Object.entries(CATEGORIES)) {
-    const weekData = getWeeklyData(currentMonth, cat);
-    const maxVal = Math.max(...weekData.map(w=>w.count), 1);
-    const c = cfg.color === 'cat1' ? 'var(--cat1)' : cfg.color === 'cat2' ? 'var(--cat2)' : 'var(--cat3)';
-    const targetLine = cfg.targetPerWeek || 0;
-
-    chartHtml += `<div style="margin-bottom:16px;background:var(--surface);border-radius:var(--radius);padding:14px;">
-      <div style="font-size:12px;font-weight:500;margin-bottom:8px;">${cat}</div>
-      <div style="display:flex;gap:6px;align-items:flex-end;height:50px;">`;
-    weekData.forEach((w,i) => {
-      const h = (w.count / Math.max(maxVal, targetLine)) * 44 + 6;
-      chartHtml += `<div style="flex:1;text-align:center;">
-        <div style="font-size:10px;color:var(--text2);margin-bottom:4px;font-family:'JetBrains Mono',monospace;">${w.count}</div>
-        <div style="height:${h}px;background:${c};border-radius:3px 3px 0 0;margin:0 auto;width:80%;"></div>
-      </div>`;
-    });
-    chartHtml += `</div><div style="display:flex;gap:6px;">`;
-    weekData.forEach((w,i) => {
-      chartHtml += `<div style="flex:1;text-align:center;font-size:9px;color:var(--text2);margin-top:3px;">W${i+1}</div>`;
-    });
-    if (targetLine) {
-      chartHtml += `</div><div style="font-size:10px;color:var(--text2);margin-top:6px;">目標ライン: 週${targetLine}件</div>`;
-    }
-    chartHtml += `</div>`;
-  }
-  document.getElementById('weeklyChart').innerHTML = chartHtml;
-
-  // Load review
-  const review = getReview(currentMonth);
-  document.getElementById('reviewOwn').value = review.own || '';
-  document.getElementById('reviewCollab').value = review.collab || '';
-  document.getElementById('reviewNext').value = review.next || '';
-}
-
-function saveReview() {
-  setReview(currentMonth, {
-    own: document.getElementById('reviewOwn').value,
-    collab: document.getElementById('reviewCollab').value,
-    next: document.getElementById('reviewNext').value,
-  });
-  showToast('✓ 振り返りを保存しました');
-}
-
-// ─── Facilities ─────────────────────
-function renderFacilities() {
-  const facs = getFacilities();
-  const html = facs.map((f,i) =>
-    `<div class="facility-item"><span>${escHtml(f)}</span><button class="facility-del" onclick="removeFacility(${i})">×</button></div>`
+  const models = [...new Set(facilities.map(f=>f.model).filter(Boolean))];
+  document.getElementById('modelChips').innerHTML = models.map(m =>
+    '<span class="chip" onclick="toggleF(\'model\',\''+m+'\',this)">'+m+'</span>'
   ).join('');
-  document.getElementById('facilityList').innerHTML = html || '<div style="font-size:12px;color:var(--text2);padding:8px;">施設が未登録です。活動記録時に自動追加されます。</div>';
 }
+
+function toggleF(key, val, el) {
+  if (activeFilters[key] === val) { delete activeFilters[key]; el.classList.remove('on'); }
+  else {
+    document.querySelectorAll('.chip[onclick*="toggleF(\''+key+'\'"]').forEach(c=>c.classList.remove('on'));
+    activeFilters[key] = val; el.classList.add('on');
+  }
+  render();
+}
+
+function getFiltered() {
+  const q = (document.getElementById('searchInput').value||'').toLowerCase();
+  return facilities.filter(f => {
+    if (activePref !== '全県' && f.prefecture !== activePref) return false;
+    if (activeFilters.rank && f.rank !== activeFilters.rank) return false;
+    if (activeFilters.model && f.model !== activeFilters.model) return false;
+    if (activeFilters.hasMemo === '有' && !f.memo) return false;
+    if (activeFilters.hasMemo === '無' && f.memo) return false;
+    if (q) {
+      const s = [f.name,f.area,f.memo,f.prefecture].join(' ').toLowerCase();
+      if (!s.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function getSorted(list) {
+  const s = document.getElementById('sortSel').value;
+  const a = [...list];
+  if (s==='pref_area') { const PO=getPrefOrder(); a.sort((x,y)=>{const d=(PO[x.prefecture]||99)-(PO[y.prefecture]||99);return d||((x.area||'').localeCompare(y.area||'','ja'));});}
+  else if (s==='pref_rank') { const PO=getPrefOrder(); a.sort((x,y)=>{const d=(PO[x.prefecture]||99)-(PO[y.prefecture]||99);return d||(RANK_ORDER[x.rank]||9)-(RANK_ORDER[y.rank]||9);});}
+  else if (s==='rank') a.sort((x,y)=>(RANK_ORDER[x.rank]||9)-(RANK_ORDER[y.rank]||9));
+  else if (s==='name') a.sort((x,y)=>x.name.localeCompare(y.name,'ja'));
+  return a;
+}
+
+// ===== RENDER LIST =====
+function render() {
+  const list = getSorted(getFiltered());
+  document.getElementById('rcount').textContent = list.length+' / '+facilities.length+' 件';
+  const ct = document.getElementById('facilityList');
+  if (!list.length) { ct.innerHTML='<div class="empty"><div class="empty-icon">🔍</div>該当施設なし</div>'; updateStats(); return; }
+  const sv = document.getElementById('sortSel').value;
+  const grp = sv==='pref_area'||sv==='pref_rank';
+  let lastP=null, lastA=null;
+  ct.innerHTML = list.map(f => {
+    let h = '';
+    if (grp && f.prefecture!==lastP) {
+      if (lastP!==null) h += '';
+      lastP=f.prefecture; lastA=null;
+      h += '<div class="grp-hdr">'+f.prefecture+prefSuffix(f.prefecture)+'</div>';
+    }
+    if (sv==='pref_area' && f.area && f.area!==lastA) {
+      lastA=f.area;
+      h += '<div class="area-hdr">📍 '+f.area+'</div>';
+    }
+    return h + renderCard(f);
+  }).join('');
+  updateStats();
+}
+
+function renderCard(f) {
+  const rc = f.rank ? ('r'+f.rank) : 'rnone';
+  const mc = f.model==='Fuji' ? 'mFuji' : f.model==='オリ' ? 'mOri' : 'mOther';
+  const lc = (visitLogs[f.id]||[]).length;
+  return '<div class="fcard'+(selId===f.id?' sel':'')+'" onclick="selectF('+f.id+')">' +
+    '<span class="rbadge '+rc+'">'+(f.rank||'—')+'</span>' +
+    '<div class="cmain">' +
+    '<div class="cname">'+f.name+'</div>' +
+    '<div class="cmeta">' +
+    '<span class="ctag">'+(f.prefecture||'—')+(f.area?' / '+f.area:'')+'</span>' +
+    (f.model?'<span class="mtag '+mc+'">'+f.model+'</span>':'') +
+    (f.holiday?'<span class="ctag">休:'+f.holiday+(f.holiday_ampm?' '+f.holiday_ampm:'')+'</span>':'') +
+    (f.pm_end?'<span class="ctag">PM終:'+f.pm_end+'</span>':'') +
+    (lc?'<span class="ctag" style="color:var(--accent)">📋'+lc+'件</span>':'') +
+    '</div>' +
+    (f.memo?'<div class="cmemo">'+f.memo+'</div>':'') +
+    '</div></div>';
+}
+
+function updateStats() {
+  document.getElementById('hTotal').textContent = facilities.length;
+  document.getElementById('hVisited').textContent = facilities.filter(f=>(visitLogs[f.id]||[]).length>0).length;
+  document.getElementById('hCA').textContent = facilities.filter(f=>f.rank==='CA').length;
+}
+
+// ===== DETAIL =====
+function selectF(id) {
+  selId = id;
+  const f = facilities.find(x=>x.id===id);
+  if (!f) return;
+  document.getElementById('dName').textContent = f.name;
+  document.getElementById('dTags').innerHTML =
+    (f.rank?'<span class="rbadge r'+f.rank+'">'+f.rank+'</span>':'') +
+    (f.model?'<span class="mtag m'+(f.model==='Fuji'?'Fuji':f.model==='オリ'?'Ori':'Other')+'">'+f.model+'</span>':'');
+  ['pref','area','holiday','holiday_ampm','am_end','pm_end'].forEach(k=>{
+    document.getElementById('d-'+k).value = f[k==='pref'?'prefecture':k]||'';
+  });
+  document.getElementById('d-model').value = f.model||'';
+  document.getElementById('d-rank').value = f.rank||'';
+  document.getElementById('d-memo').value = f.memo||'';
+  renderVisitLog(id);
+  document.getElementById('detailPanel').classList.remove('hide');
+  render();
+}
+
+function saveDet(key, val) {
+  const f = facilities.find(x=>x.id===selId);
+  if (!f) return;
+  f[key] = val;
+  saveF();
+  if (key==='prefecture') buildTabs();
+  render();
+}
+
+function closeDetail() {
+  selId=null;
+  document.getElementById('detailPanel').classList.add('hide');
+  render();
+}
+
+function renderVisitLog(id) {
+  const logs = visitLogs[id]||[];
+  const ct = document.getElementById('visitLogList');
+  if (!logs.length) { ct.innerHTML='<div style="font-size:12px;color:var(--text3)">訪問記録なし</div>'; return; }
+  ct.innerHTML = [...logs].reverse().map((log,ri) => {
+    const idx = logs.length-1-ri;
+    return '<div class="ventry">' +
+      '<button class="vdel" onclick="delVisitLog('+id+','+idx+')">✕</button>' +
+      '<div class="vdate">'+log.date+'</div>' +
+      '<div class="vcont">'+log.content+'</div>' +
+      '</div>';
+  }).join('');
+}
+
+function delVisitLog(fid, idx) {
+  if (!visitLogs[fid]) return;
+  visitLogs[fid].splice(idx,1);
+  saveL(); renderVisitLog(fid); render(); showToast('削除しました');
+}
+
+// ===== VOICE (施設詳細) =====
+function toggleVoice() {
+  if (!selId) { showToast('施設を選択してください','err'); return; }
+  isVoiceRec ? stopVoice() : startVoice();
+}
+function startVoice() {
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  if (!SR) { showToast('Chrome推奨','err'); return; }
+  voiceRec = new SR(); voiceRec.lang='ja-JP'; voiceRec.continuous=true; voiceRec.interimResults=true;
+  voiceRec.onstart = function() {
+    isVoiceRec=true;
+    document.getElementById('voiceBtn').classList.add('rec');
+    document.getElementById('voiceBtn').innerHTML='⏹ 停止（録音中…）';
+    document.getElementById('voicePreview').classList.add('show');
+    document.getElementById('voiceText').textContent='話してください…';
+    document.getElementById('voiceActions').style.display='none';
+  };
+  voiceRec.onresult = function(e) {
+    let f='',i='';
+    for(let x=e.resultIndex;x<e.results.length;x++){if(e.results[x].isFinal)f+=e.results[x][0].transcript;else i+=e.results[x][0].transcript;}
+    voiceText=f||i; document.getElementById('voiceText').textContent=voiceText||'話してください…';
+  };
+  voiceRec.onend = function() {
+    isVoiceRec=false;
+    document.getElementById('voiceBtn').classList.remove('rec');
+    document.getElementById('voiceBtn').innerHTML='🎤 音声で訪問記録を追加';
+    if (voiceText) {
+      document.getElementById('voiceText').innerHTML = '<strong style="font-size:11px;color:var(--text3)">📅 '+todayStr()+'</strong><br>'+voiceText;
+      document.getElementById('voiceActions').style.display='flex';
+    }
+  };
+  voiceRec.start();
+}
+function stopVoice() { if(voiceRec) voiceRec.stop(); }
+function applyVoice() {
+  if (!voiceText||!selId) return;
+  const d = todayStr();
+  if (!visitLogs[selId]) visitLogs[selId]=[];
+  visitLogs[selId].push({date:d, content:voiceText});
+  saveL();
+  // 日報にも自動追加
+  const f = facilities.find(x=>x.id===selId);
+  if (!dailyData[d]) dailyData[d]={summary:'',visits:[]};
+  dailyData[d].visits.push({name:f?f.name:'', content:voiceText});
+  saveD();
+  renderVisitLog(selId); cancelVoice(); render(); showToast('記録を追加しました（日報にも反映）','ok');
+}
+function cancelVoice() {
+  document.getElementById('voicePreview').classList.remove('show');
+  document.getElementById('voiceActions').style.display='none';
+  voiceText='';
+}
+
+// ===== 日報ビュー =====
+function dChangeDate(delta) {
+  if (delta===0) { dCurrentDate=todayStr(); }
+  else {
+    const p=dCurrentDate.split('/');
+    const d=new Date(+p[0],+p[1]-1,+p[2]);
+    d.setDate(d.getDate()+delta);
+    dCurrentDate=d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate());
+  }
+  renderDailyView();
+}
+
+function renderDailyView() {
+  const p=dCurrentDate.split('/');
+  const d=new Date(+p[0],+p[1]-1,+p[2]);
+  const dn=['日','月','火','水','木','金','土'];
+  document.getElementById('dDateLabel').textContent=dCurrentDate+'（'+dn[d.getDay()]+'）';
+  const day=dailyData[dCurrentDate]||{summary:'',visits:[]};
+  document.getElementById('dSummary').value=day.summary||'';
+  const visits=day.visits||[];
+  const ct=document.getElementById('dVisitList');
+  if (!visits.length) { ct.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0">この日の訪問記録はありません</div>'; }
+  else { ct.innerHTML=
+    '<button class="copy-all-btn" onclick="copyDayAll()">📋 この日の訪問をまとめてコピー</button>' +
+    visits.map((v,i)=>
+    '<div class="dvisit-card">' +
+    '<button class="ddel" onclick="delDayVisit('+i+')">✕</button>' +
+    '<button class="copy-btn" onclick="copyDayVisit('+i+')" title="コピー" style="right:32px">📋</button>' +
+    '<div class="dv-name">🏥 '+(v.name||'施設不明')+'</div>' +
+    '<div class="dv-body">'+v.content+'</div>' +
+    '</div>'
+  ).join(''); }
+  renderHistory();
+}
+
+function renderHistory() {
+  const all = Object.keys(dailyData)
+    .filter(d => {
+      const day = dailyData[d];
+      return (day.visits&&day.visits.length) || day.summary;
+    })
+    .sort((a,b)=>b>a?1:-1);
+  const ct = document.getElementById('historyList');
+  if (!all.length) { ct.innerHTML='<div style="font-size:12px;color:var(--text3)">記録がまだありません</div>'; return; }
+  const dn=['日','月','火','水','木','金','土'];
+  ct.innerHTML = all.map((d,idx) => {
+    const day=dailyData[d];
+    const visits=day.visits||[];
+    const p=d.split('/');
+    const dt=new Date(+p[0],+p[1]-1,+p[2]);
+    const label=d+'（'+dn[dt.getDay()]+'）';
+    const vrows=visits.map(v=>
+      '<div class="hist-vrow"><span class="hist-fname">'+(v.name||'施設不明')+'</span>　'+v.content+'</div>'
+    ).join('');
+    return '<div class="hist-card" onclick="toggleHist('+idx+')">' +
+      '<div class="hist-hdr">' +
+      '<div class="hist-date">'+label+'</div>' +
+      '<div class="hist-cnt">訪問 '+visits.length+'件</div>' +
+      '</div>' +
+      (day.summary?'<div class="hist-summary">'+day.summary+'</div>':'') +
+      '<div class="hist-detail" id="hist'+idx+'">'+vrows+'</div>' +
+      '</div>';
+  }).join('');
+}
+
+function toggleHist(idx) {
+  const el=document.getElementById('hist'+idx);
+  if (el) el.classList.toggle('open');
+}
+
+function saveDaySummary() {
+  if (!dailyData[dCurrentDate]) dailyData[dCurrentDate]={summary:'',visits:[]};
+  dailyData[dCurrentDate].summary=document.getElementById('dSummary').value;
+  saveD();
+}
+
+function delDayVisit(idx) {
+  if (!dailyData[dCurrentDate]) return;
+  dailyData[dCurrentDate].visits.splice(idx,1);
+  saveD(); renderDailyView();
+}
+
+function copyDayVisit(idx) {
+  const day=dailyData[dCurrentDate];
+  if(!day||!day.visits[idx])return;
+  const v=day.visits[idx];
+  const text=(v.name||'施設不明')+'：'+v.content;
+  navigator.clipboard.writeText(text).then(()=>showToast('コピーしました','ok')).catch(()=>{fallbackCopy(text);});
+}
+
+function copyDayAll() {
+  const day=dailyData[dCurrentDate];
+  if(!day||!day.visits||!day.visits.length){showToast('コピーする記録がありません','err');return;}
+  let text=dCurrentDate+'\n';
+  if(day.summary) text+='【所感】'+day.summary+'\n\n';
+  day.visits.forEach((v,i)=>{
+    text+=(v.name||'施設不明')+'：'+v.content+'\n';
+  });
+  navigator.clipboard.writeText(text.trim()).then(()=>showToast('全訪問をコピーしました','ok')).catch(()=>{fallbackCopy(text.trim());});
+}
+
+function openDailyModal() {
+  document.getElementById('dm-date').value=dateInputVal();
+  document.getElementById('dm-facility').value='';
+  document.getElementById('dm-content').value='';
+  document.getElementById('dmSuggest').style.display='none';
+  document.getElementById('dailyModal').classList.add('show');
+}
+
+function dmUpdateSuggest() {
+  const q=document.getElementById('dm-facility').value.toLowerCase();
+  const box=document.getElementById('dmSuggest');
+  if (!q) { box.style.display='none'; return; }
+  const hits=facilities.filter(f=>f.name.toLowerCase().includes(q)).slice(0,7);
+  if (!hits.length) { box.style.display='none'; return; }
+  box.style.display='block';
+  box.innerHTML=hits.map(f=>
+    '<div class="rep-sug-item" onclick="dmPick(\''+f.name.replace(/'/g,'&#39;')+'\')">'+f.name+
+    ' <span style="font-size:11px;color:var(--text3)">'+(f.prefecture||'')+' '+(f.area||'')+'</span></div>'
+  ).join('');
+}
+function dmPick(name) {
+  document.getElementById('dm-facility').value=name;
+  document.getElementById('dmSuggest').style.display='none';
+}
+
+function saveDailyVisit() {
+  const name=document.getElementById('dm-facility').value.trim();
+  const content=document.getElementById('dm-content').value.trim();
+  const dateStr=inputToSlash(document.getElementById('dm-date').value);
+  if (!content) { showToast('訪問内容を入力してください','err'); return; }
+  if (!dailyData[dateStr]) dailyData[dateStr]={summary:'',visits:[]};
+  dailyData[dateStr].visits.push({name,content});
+  saveD();
+  // 施設の訪問ログにも追加
+  if (name) {
+    const f=facilities.find(x=>x.name===name);
+    if (f) {
+      if (!visitLogs[f.id]) visitLogs[f.id]=[];
+      visitLogs[f.id].push({date:dateStr,content});
+      saveL();
+    }
+  }
+  dCurrentDate=dateStr;
+  closeModal('dailyModal');
+  renderDailyView();
+  showToast('訪問を追加しました','ok');
+}
+
+// 日報音声
+function toggleDailyVoice() { isDVoiceRec ? stopDVoice() : startDVoice(); }
+function startDVoice() {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if (!SR) { showToast('Chrome推奨','err'); return; }
+  dVoiceRec=new SR(); dVoiceRec.lang='ja-JP'; dVoiceRec.continuous=true; dVoiceRec.interimResults=true;
+  dVoiceRec.onstart=function(){
+    isDVoiceRec=true;
+    document.getElementById('dVoiceBtn').classList.add('rec');
+    document.getElementById('dVoiceBtn').innerHTML='⏹ 停止（録音中…）';
+    document.getElementById('dVoicePrev').classList.add('show');
+    document.getElementById('dVoiceText').textContent='話してください…';
+    document.getElementById('dVoiceActions').style.display='none';
+  };
+  dVoiceRec.onresult=function(e){
+    let f='',i='';
+    for(let x=e.resultIndex;x<e.results.length;x++){if(e.results[x].isFinal)f+=e.results[x][0].transcript;else i+=e.results[x][0].transcript;}
+    dVoiceText=f||i; document.getElementById('dVoiceText').textContent=dVoiceText||'話してください…';
+  };
+  dVoiceRec.onend=function(){
+    isDVoiceRec=false;
+    document.getElementById('dVoiceBtn').classList.remove('rec');
+    document.getElementById('dVoiceBtn').innerHTML='🎤 音声で追加';
+    if (dVoiceText) {
+      document.getElementById('dVoiceText').innerHTML=
+        '<div style="margin-bottom:5px;font-size:11px;color:var(--text3)">施設名（任意）: '+
+        '<input id="dvFacInput" type="text" placeholder="施設名" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:12px;width:150px;outline:none"></div>'+
+        '<div>'+dVoiceText+'</div>';
+      document.getElementById('dVoiceActions').style.display='flex';
+    }
+  };
+  dVoiceRec.start();
+}
+function stopDVoice() { if(dVoiceRec) dVoiceRec.stop(); }
+function applyDailyVoice() {
+  const inp=document.getElementById('dvFacInput');
+  const name=inp?inp.value.trim():'';
+  const d=todayStr();
+  if (!dailyData[d]) dailyData[d]={summary:'',visits:[]};
+  dailyData[d].visits.push({name,content:dVoiceText});
+  saveD();
+  if (name) {
+    const f=facilities.find(x=>x.name===name);
+    if (f) {
+      if (!visitLogs[f.id]) visitLogs[f.id]=[];
+      visitLogs[f.id].push({date:d,content:dVoiceText});
+      saveL();
+    }
+  }
+  cancelDailyVoice(); dCurrentDate=d; renderDailyView(); showToast('追加しました','ok');
+}
+function cancelDailyVoice() {
+  document.getElementById('dVoicePrev').classList.remove('show');
+  document.getElementById('dVoiceActions').style.display='none';
+  dVoiceText='';
+}
+
+// ===== 報告ビュー =====
+function renderReportView() {
+  document.getElementById('repDate').value=dateInputVal();
+  renderRepHistory();
+}
+
+function repUpdateSuggest() {
+  const q=document.getElementById('repFacility').value.toLowerCase();
+  const box=document.getElementById('repSuggest');
+  if (!q) { box.style.display='none'; return; }
+  const hits=facilities.filter(f=>f.name.toLowerCase().includes(q)).slice(0,7);
+  if (!hits.length) { box.style.display='none'; return; }
+  box.style.display='block';
+  box.innerHTML=hits.map(f=>
+    '<div class="rep-sug-item" onclick="repPick(\''+f.name.replace(/'/g,'&#39;')+'\')">'+f.name+
+    ' <span style="font-size:11px;color:var(--text3)">'+(f.prefecture||'')+' '+(f.area||'')+'</span></div>'
+  ).join('');
+}
+function repPick(name) {
+  document.getElementById('repFacility').value=name;
+  document.getElementById('repSuggest').style.display='none';
+}
+
+function saveReport() {
+  const dateStr=inputToSlash(document.getElementById('repDate').value);
+  const name=document.getElementById('repFacility').value.trim();
+  const content=document.getElementById('repContent').value.trim();
+  if (!content) { showToast('訪問内容を入力してください','err'); return; }
+  // reportDataに追加
+  reportData.push({id:nextRepId++, date:dateStr, facilityName:name, content});
+  saveR();
+  // 施設の訪問ログにも追加
+  if (name) {
+    const f=facilities.find(x=>x.name===name);
+    if (f) {
+      if (!visitLogs[f.id]) visitLogs[f.id]=[];
+      visitLogs[f.id].push({date:dateStr,content});
+      saveL();
+    }
+  }
+  // 日報にも追加
+  if (!dailyData[dateStr]) dailyData[dateStr]={summary:'',visits:[]};
+  dailyData[dateStr].visits.push({name,content});
+  saveD();
+  document.getElementById('repFacility').value='';
+  document.getElementById('repContent').value='';
+  renderRepHistory();
+  showToast('報告を保存しました（施設・日報にも反映）','ok');
+}
+
+function renderRepHistory() {
+  const ct=document.getElementById('repHistoryList');
+  const sorted=[...reportData].sort((a,b)=>b.date>a.date?1:-1);
+  if (!sorted.length) { ct.innerHTML='<div style="font-size:12px;color:var(--text3)">報告履歴がありません</div>'; return; }
+  ct.innerHTML=sorted.map(r=>
+    '<div class="rep-card">' +
+    '<button class="rep-del" onclick="delReport('+r.id+')">✕</button>' +
+    '<button class="copy-btn" onclick="copyReport('+r.id+')" title="コピー">📋</button>' +
+    '<div class="rep-card-hdr">' +
+    '<div class="rep-card-date">'+r.date+'</div>' +
+    '</div>' +
+    '<div class="rep-card-name">🏥 '+(r.facilityName||'施設不明')+'</div>' +
+    '<div class="rep-card-body">'+r.content+'</div>' +
+    '</div>'
+  ).join('');
+}
+
+function copyReport(id) {
+  const r=reportData.find(x=>x.id===id);
+  if(!r)return;
+  const text=r.date+' '+( r.facilityName||'')+'\\n'+r.content;
+  navigator.clipboard.writeText(text).then(()=>showToast('コピーしました','ok')).catch(()=>{fallbackCopy(text);});
+}
+
+function fallbackCopy(text) {
+  const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  showToast('コピーしました','ok');
+}
+
+function delReport(id) {
+  reportData=reportData.filter(r=>r.id!==id);
+  saveR(); renderRepHistory(); showToast('削除しました');
+}
+
+// ===== 施設追加 =====
+function openAddModal() { document.getElementById('addModal').classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
 function addFacility() {
-  const input = document.getElementById('newFacility');
-  const name = input.value.trim();
-  if (!name) return;
-  const facs = getFacilities();
-  if (!facs.includes(name)) { facs.push(name); setFacilities(facs); }
-  input.value = '';
-  renderFacilities();
-  showToast('施設を追加しました');
-}
-function removeFacility(i) {
-  const facs = getFacilities();
-  facs.splice(i,1);
-  setFacilities(facs);
-  renderFacilities();
-}
-function updateFacilityDatalist() {
-  const dl = document.getElementById('facilityDatalist');
-  dl.innerHTML = getFacilities().map(f => `<option value="${escHtml(f)}">`).join('');
+  const name=document.getElementById('new-name').value.trim();
+  if (!name) { showToast('施設名を入力してください','err'); return; }
+  const f={
+    id:nextId++, name,
+    prefecture:document.getElementById('new-pref').value.trim(),
+    area:document.getElementById('new-area').value.trim(),
+    model:document.getElementById('new-model').value,
+    rank:document.getElementById('new-rank').value,
+    holiday:'',holiday_ampm:'',am_end:'',pm_end:'',
+    memo:document.getElementById('new-memo').value.trim()
+  };
+  facilities.push(f); saveF();
+  closeModal('addModal');
+  buildChips();
+  buildTabs();
+  // 全県タブに戻してリスト表示
+  activePref='全県';
+  activeView='list';
+  document.getElementById('listView').style.display='';
+  document.getElementById('dailyView').classList.remove('show');
+  document.getElementById('reportView').classList.remove('show');
+  document.getElementById('kpiView').classList.remove('show');
+  activeFilters={};
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  render();
+  showToast('施設を追加しました','ok');
+  ['new-name','new-pref','new-area','new-memo'].forEach(id=>document.getElementById(id).value='');
 }
 
-// ─── Export / Import ─────────────────────
-function exportJSON() {
-  const data = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('kpi_')) {
-      data[key] = JSON.parse(localStorage.getItem(key));
-    }
-  }
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `kpi_backup_${new Date().toISOString().slice(0,10)}.json`;
+// ===== CSV =====
+function exportCSV() {
+  const list=getSorted(getFiltered());
+  const hdr=['ID','施設名','都道府県','エリア','機種','ランク','休診日','休診AMPM','AM終了','PM終了','備考メモ','訪問件数'];
+  const rows=list.map(f=>[f.id,f.name,f.prefecture,f.area,f.model,f.rank,f.holiday,f.holiday_ampm,f.am_end,f.pm_end,'"'+(f.memo||'').replace(/"/g,'""')+'"',(visitLogs[f.id]||[]).length]);
+  const csv='\uFEFF'+[hdr,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='medsales_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
-  URL.revokeObjectURL(url);
-  showToast('JSONエクスポート完了');
+  showToast('CSVをエクスポートしました','ok');
 }
 
-function importJSON(e) {
-  const file = e.target.files[0];
+// ===== バックアップ / 復元 =====
+function exportBackup() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    facilities: facilities,
+    visitLogs: visitLogs,
+    dailyData: dailyData,
+    reportData: reportData,
+    nextId: nextId,
+    nextRepId: nextRepId
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const d = new Date();
+  a.download = 'medsales_backup_' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '.json';
+  a.click();
+  showToast('バックアップを保存しました', 'ok');
+}
+
+function importBackup(input) {
+  const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(ev) {
+  reader.onload = function(e) {
     try {
-      const data = JSON.parse(ev.target.result);
-      let count = 0;
-      for (const [key, val] of Object.entries(data)) {
-        if (key.startsWith('kpi_')) {
-          localStorage.setItem(key, JSON.stringify(val));
-          count++;
-        }
+      const data = JSON.parse(e.target.result);
+      if (!data.facilities || !Array.isArray(data.facilities)) {
+        showToast('ファイルが正しくありません', 'err'); return;
       }
-      renderAll();
-      showToast(`${count}件のデータをインポートしました`);
-    } catch { showToast('ファイルの読み込みに失敗しました'); }
+      const count = data.facilities.length;
+      if (!confirm('復元すると現在のデータが上書きされます。\n施設数: ' + count + '件\nエクスポート日時: ' + (data.exportedAt||'不明') + '\n\n続けますか？')) {
+        input.value = ''; return;
+      }
+      facilities  = data.facilities  || [];
+      visitLogs   = data.visitLogs   || {};
+      dailyData   = data.dailyData   || {};
+      reportData  = data.reportData  || [];
+      nextId      = data.nextId      || (Math.max(...facilities.map(f=>f.id), 2999) + 1);
+      nextRepId   = data.nextRepId   || (reportData.length ? Math.max(...reportData.map(r=>r.id||0)) + 1 : 1);
+      saveF(); saveL(); saveD(); saveR();
+      buildChips();
+      buildTabs();
+      render();
+      showToast('復元しました（施設 ' + count + '件）', 'ok');
+    } catch(err) {
+      showToast('読み込みに失敗しました', 'err');
+    }
+    input.value = '';
   };
-  reader.readAsText(file);
-  e.target.value = '';
+  reader.readAsText(file, 'utf-8');
 }
 
-function exportPDF() {
-  // Generate a printable summary in a new window
-  const entries = getEntries(currentMonth);
-  const weeks = getWeeksInMonth(currentMonth);
-  const review = getReview(currentMonth);
-  const [y,m] = currentMonth.split('-');
-
-  let rows = '';
-  for (const [cat, cfg] of Object.entries(CATEGORIES)) {
-    const count = entries.filter(e => e.category === cat).length;
-    let target;
-    if (cfg.targetPerWeek) { target = cfg.targetPerWeek * weeks; }
-    else { target = cfg.targetTotal; }
-    const pct = target > 0 ? Math.round(count / target * 100) : 0;
-    rows += `<tr><td>${cat}</td><td>${cfg.kpi}</td><td style="text-align:center">${count}/${target}</td><td style="text-align:center">${pct}%</td></tr>`;
-  }
-
-  // Activity detail by category
-  let detailRows = '';
-  for (const [cat] of Object.entries(CATEGORIES)) {
-    const catEntries = entries.filter(e => e.category === cat).sort((a,b) => a.date.localeCompare(b.date));
-    catEntries.forEach(e => {
-      detailRows += `<tr><td>${e.date}</td><td>${cat}</td><td>${e.type || '-'}</td><td>${escHtml(e.facility)}</td><td>${escHtml(e.memo || '-')}</td></tr>`;
-    });
-  }
-
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>KPIサマリー ${y}年${m}月</title>
-<style>
-  body{font-family:'Noto Sans JP',sans-serif;margin:30px;color:#222;font-size:13px;}
-  h1{font-size:18px;margin-bottom:4px;} h2{font-size:14px;margin:20px 0 8px;border-bottom:2px solid #333;padding-bottom:4px;}
-  table{width:100%;border-collapse:collapse;margin-bottom:16px;}
-  th,td{border:1px solid #ccc;padding:6px 10px;text-align:left;font-size:12px;}
-  th{background:#f0f0f0;font-weight:600;}
-  .review{margin-top:12px;padding:10px;border:1px solid #ddd;border-radius:4px;white-space:pre-wrap;min-height:40px;font-size:12px;line-height:1.8;}
-  .label{font-size:12px;font-weight:600;margin-top:12px;margin-bottom:4px;}
-  @media print{body{margin:15px;}}
-</style></head><body>
-<h1>FY09下期 アクションプラン（${y}年${parseInt(m)}月）</h1>
-<h2>月間実績</h2>
-<table><tr><th>アクションプラン</th><th>KPI</th><th>実績</th><th>達成率</th></tr>${rows}</table>
-<h2>活動明細</h2>
-<table><tr><th>日付</th><th>カテゴリ</th><th>タイプ</th><th>施設</th><th>メモ</th></tr>${detailRows}</table>
-<h2>振り返り</h2>
-<div class="label">自身の活動：</div><div class="review">${escHtml(review.own || '（未記入）')}</div>
-<div class="label">他社協業：</div><div class="review">${escHtml(review.collab || '（未記入）')}</div>
-<div class="label">来月の活動計画：</div><div class="review">${escHtml(review.next || '（未記入）')}</div>
-</body></html>`;
-
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
-  setTimeout(() => win.print(), 500);
+// ===== SIDEBAR / TOAST =====
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+}
+function showToast(msg, type) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(type?' '+type:'');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-function confirmClear() {
-  const [y,m] = currentMonth.split('-');
-  if (confirm(`${y}年${parseInt(m)}月のデータをすべて削除しますか？\nこの操作は取り消せません。`)) {
-    localStorage.removeItem(storageKey(currentMonth));
-    localStorage.removeItem(`kpi_review_${currentMonth}`);
-    renderAll();
-    showToast('当月データを削除しました');
-  }
-}
+// ===== KPI TRACKER =====
+let kpiMonth = new Date().toISOString().slice(0,7);
+let kpiSelectedCat = null;
+const KPI_CATS = {
+  '案件創出': {cls:'kc1',kpi:'週5件の新規案件創出活動',perWeek:5},
+  '案件進展': {cls:'kc2',kpi:'週2件の案件フェーズの進展',perWeek:2},
+  '予算申請': {cls:'kc3',kpi:'8月までに予算申請可能施設を3件',total:3}
+};
 
-// ─── Helpers ─────────────────────
-function getWeeksInMonth(month) {
-  const [y,m] = month.split('-').map(Number);
-  const days = new Date(y, m, 0).getDate();
-  return Math.ceil(days / 7);
-}
+function kpiKey(m){return 'kpi_entries_'+m;}
+function kpiReviewKey(m){return 'kpi_review_'+m;}
+function kpiGetEntries(m){try{return JSON.parse(localStorage.getItem(kpiKey(m)))||[];}catch{return [];}}
+function kpiSetEntries(m,e){localStorage.setItem(kpiKey(m),JSON.stringify(e));}
+function kpiGetReview(m){try{return JSON.parse(localStorage.getItem(kpiReviewKey(m)))||{};}catch{return {};}}
+function kpiSetReview(m,d){localStorage.setItem(kpiReviewKey(m),JSON.stringify(d));}
 
-function getWeeklyData(month, category) {
-  const [y,m] = month.split('-').map(Number);
-  const entries = getEntries(month).filter(e => e.category === category);
-  const daysInMonth = new Date(y, m, 0).getDate();
-  const weeks = [];
-  for (let d = 1; d <= daysInMonth; d += 7) {
-    const start = d;
-    const end = Math.min(d + 6, daysInMonth);
-    const count = entries.filter(e => {
-      const day = parseInt(e.date.split('-')[2]);
-      return day >= start && day <= end;
-    }).length;
-    weeks.push({ start, end, count });
+function kpiWeeksInMonth(m){const[y,mo]=m.split('-').map(Number);return Math.ceil(new Date(y,mo,0).getDate()/7);}
+function kpiWeeklyData(m,cat){
+  const[y,mo]=m.split('-').map(Number);
+  const entries=kpiGetEntries(m).filter(e=>e.category===cat);
+  const dim=new Date(y,mo,0).getDate();
+  const weeks=[];
+  for(let d=1;d<=dim;d+=7){
+    const s=d,end=Math.min(d+6,dim);
+    const c=entries.filter(e=>{const day=parseInt(e.date.split('-')[2]);return day>=s&&day<=end;}).length;
+    weeks.push({s,end,count:c});
   }
   return weeks;
 }
 
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
+function kpiChangeMonth(d){
+  const dt=new Date(kpiMonth+'-01');dt.setMonth(dt.getMonth()+d);
+  kpiMonth=dt.toISOString().slice(0,7);
+  renderKpi();
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+function renderKpi(){
+  const[y,m]=kpiMonth.split('-');
+  document.getElementById('kpiMonthLabel').textContent=y+'/'+m;
+  const entries=kpiGetEntries(kpiMonth);
+  const weeks=kpiWeeksInMonth(kpiMonth);
+  let html='<div class="kpi-card-row">';
+  for(const[cat,cfg] of Object.entries(KPI_CATS)){
+    const count=entries.filter(e=>e.category===cat).length;
+    let target,pct;
+    if(cfg.perWeek){target=cfg.perWeek*weeks;pct=target>0?Math.min(Math.round(count/target*100),100):0;}
+    else{target=cfg.total;pct=Math.min(Math.round(count/target*100),100);}
+    const wd=kpiWeeklyData(kpiMonth,cat);
+    const mx=Math.max(...wd.map(w=>w.count),1);
+    const clr=cfg.cls==='kc1'?'#dc2626':cfg.cls==='kc2'?'#2563eb':'#d97706';
+    let bars='<div class="kpi-week-bars">';
+    wd.forEach(w=>{const h=(w.count/mx)*24+4;bars+=`<div class="kpi-week-bar" style="height:${h}px;background:${clr}"></div>`;});
+    bars+='</div>';
+    const pctColor=pct>=100?'var(--green)':pct>=70?'var(--yellow)':'var(--red)';
+    const weekAvg=weeks>0?(count/weeks).toFixed(1):'0';
+    let targetLabel=cfg.perWeek?`目標:週${cfg.perWeek}件(月${target}件) 週平均${weekAvg}件`:`目標:${cfg.total}件 残り${Math.max(cfg.total-count,0)}件`;
+    html+=`<div class="kpi-card ${cfg.cls}">
+      <div class="kpi-card-title">${cat}</div>
+      <div class="kpi-card-target">${targetLabel}</div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <span class="kpi-card-num ${cfg.cls}">${count}</span><span style="font-size:12px;color:var(--text2)">件</span>
+        <span style="margin-left:auto;font-size:11px;color:${pctColor};font-weight:600">${pct}%</span>
+      </div>
+      <div class="kpi-bar"><div class="kpi-bar-fill ${cfg.cls}" style="width:${pct}%"></div></div>
+      ${bars}
+    </div>`;
+  }
+  html+='</div>';
+  html+='<div class="kpi-actions"><button class="btn" onclick="openKpiSummary()">📊 サマリー・振り返り</button><button class="btn" onclick="kpiExportJSON()">💾 KPIバックアップ</button></div>';
+  // Log entries
+  const sorted=[...entries].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  if(!sorted.length){html+='<div class="empty"><div class="empty-icon">🎯</div>まだKPI活動記録がありません</div>';}
+  else{
+    let lastD='';
+    sorted.forEach(e=>{
+      if(e.date!==lastD){
+        const dd=new Date(e.date+'T00:00:00');const dow=['日','月','火','水','木','金','土'][dd.getDay()];
+        html+=`<div style="font-size:11px;color:var(--text3);margin-top:12px;margin-bottom:4px;">${e.date} (${dow})</div>`;
+        lastD=e.date;
+      }
+      const cfg=KPI_CATS[e.category]||{cls:'kc1'};
+      html+=`<div class="kpi-log-item">
+        <button class="kpi-log-del" onclick="kpiDelEntry(${e.id})">✕</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span class="kpi-log-cat ${cfg.cls}">${e.category}</span>
+          <span class="kpi-log-date">${e.date}</span>
+        </div>
+        <div class="kpi-log-fac">${e.facility}</div>
+        ${e.memo?`<div class="kpi-log-memo">${e.memo}</div>`:''}
+      </div>`;
+    });
+  }
+  document.getElementById('kpiContent').innerHTML=html;
 }
 
-// ─── Init ─────────────────────
-renderAll();
+function openKpiModal(){
+  kpiSelectedCat=null;
+  document.querySelectorAll('#kpiCatChips .chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('kpi-date').value=dateInputVal();
+  document.getElementById('kpi-facility').value='';
+  document.getElementById('kpi-memo').value='';
+  // reset new facility area
+  document.getElementById('kpiNewFacArea').style.display='none';
+  ['kpi-new-pref','kpi-new-area'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('kpi-new-model').value='';
+  document.getElementById('kpi-new-rank').value='';
+  // populate datalist from facilities
+  document.getElementById('kpiFacDL').innerHTML=facilities.map(f=>'<option value="'+f.name+'">').join('');
+  document.getElementById('kpiModal').classList.add('show');
+}
+
+function kpiSelectCat(cat,el){
+  document.querySelectorAll('#kpiCatChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');kpiSelectedCat=cat;
+}
+
+function saveKpiEntry(){
+  if(!kpiSelectedCat){showToast('カテゴリを選択','err');return;}
+  const date=document.getElementById('kpi-date').value;
+  const fac=document.getElementById('kpi-facility').value.trim();
+  if(!fac){showToast('施設名を入力','err');return;}
+  if(!date){showToast('日付を入力','err');return;}
+
+  // 未登録施設チェック
+  const existing=facilities.find(x=>x.name===fac);
+  const newFacArea=document.getElementById('kpiNewFacArea');
+  if(!existing && newFacArea.style.display==='none'){
+    // 初回：登録フォームを表示して確認
+    newFacArea.style.display='block';
+    showToast('未登録の施設です。情報を入力して再度「記録」を押してください','');
+    return;
+  }
+
+  // 未登録なら施設を新規登録
+  if(!existing){
+    const newF={
+      id:nextId++, name:fac,
+      prefecture:document.getElementById('kpi-new-pref').value.trim(),
+      area:document.getElementById('kpi-new-area').value.trim(),
+      model:document.getElementById('kpi-new-model').value,
+      rank:document.getElementById('kpi-new-rank').value,
+      holiday:'',holiday_ampm:'',am_end:'',pm_end:'',
+      memo:''
+    };
+    facilities.push(newF); saveF();
+    buildChips(); buildTabs();
+  }
+
+  const month=date.slice(0,7);
+  const memo=document.getElementById('kpi-memo').value.trim();
+  const entries=kpiGetEntries(month);
+  entries.push({id:Date.now(),category:kpiSelectedCat,date,facility:fac,memo});
+  kpiSetEntries(month,entries);
+
+  // --- 報告・日報・施設ログにも自動連携 ---
+  const dateSlash=inputToSlash(date);
+  const content='[KPI:'+kpiSelectedCat+'] '+(memo||fac);
+
+  // 報告データに追加
+  reportData.push({id:nextRepId++, date:dateSlash, facilityName:fac, content});
+  saveR();
+
+  // 日報データに追加
+  if(!dailyData[dateSlash]) dailyData[dateSlash]={summary:'',visits:[]};
+  dailyData[dateSlash].visits.push({name:fac, content});
+  saveD();
+
+  // 施設の訪問ログに追加
+  const f=facilities.find(x=>x.name===fac);
+  if(f){
+    if(!visitLogs[f.id]) visitLogs[f.id]=[];
+    visitLogs[f.id].push({date:dateSlash, content});
+    saveL();
+  }
+
+  if(month===kpiMonth)renderKpi();
+  closeModal('kpiModal');
+  showToast(existing?'KPI活動を記録しました（報告・日報にも反映）':'KPI活動を記録し、施設も新規登録しました','ok');
+}
+
+function kpiDelEntry(id){
+  if(!confirm('この記録を削除しますか？'))return;
+  const entries=kpiGetEntries(kpiMonth).filter(e=>e.id!==id);
+  kpiSetEntries(kpiMonth,entries);renderKpi();showToast('削除しました');
+}
+
+function openKpiSummary(){
+  const entries=kpiGetEntries(kpiMonth);
+  const weeks=kpiWeeksInMonth(kpiMonth);
+  let tbl='<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;">';
+  tbl+='<tr style="background:var(--surface2)"><th style="padding:6px;text-align:left;border:1px solid var(--border)">アクションプラン</th><th style="padding:6px;border:1px solid var(--border)">KPI</th><th style="padding:6px;border:1px solid var(--border)">実績</th><th style="padding:6px;border:1px solid var(--border)">達成率</th></tr>';
+  for(const[cat,cfg] of Object.entries(KPI_CATS)){
+    const c=entries.filter(e=>e.category===cat).length;
+    let t;if(cfg.perWeek)t=cfg.perWeek*weeks;else t=cfg.total;
+    const p=t>0?Math.round(c/t*100):0;
+    const clr=p>=100?'var(--green)':p>=70?'var(--yellow)':'var(--red)';
+    tbl+=`<tr><td style="padding:6px;border:1px solid var(--border)">${cat}</td><td style="padding:6px;border:1px solid var(--border);font-size:10px;color:var(--text2)">${cfg.kpi}</td><td style="padding:6px;border:1px solid var(--border);text-align:center">${c}/${t}</td><td style="padding:6px;border:1px solid var(--border);text-align:center;color:${clr};font-weight:600">${p}%</td></tr>`;
+  }
+  tbl+='</table>';
+  document.getElementById('kpiSummaryContent').innerHTML=tbl;
+  const rv=kpiGetReview(kpiMonth);
+  document.getElementById('kpiReviewOwn').value=rv.own||'';
+  document.getElementById('kpiReviewCollab').value=rv.collab||'';
+  document.getElementById('kpiReviewNext').value=rv.next||'';
+  document.getElementById('kpiSummaryModal').classList.add('show');
+}
+
+function kpiSaveReview(){
+  kpiSetReview(kpiMonth,{own:document.getElementById('kpiReviewOwn').value,collab:document.getElementById('kpiReviewCollab').value,next:document.getElementById('kpiReviewNext').value});
+  showToast('振り返りを保存しました','ok');
+}
+
+function kpiExportJSON(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('kpi_'))data[k]=JSON.parse(localStorage.getItem(k));}
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='kpi_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  showToast('KPIバックアップ完了','ok');
+}
+
+function kpiExportPDF(){
+  const entries=kpiGetEntries(kpiMonth);const weeks=kpiWeeksInMonth(kpiMonth);
+  const rv=kpiGetReview(kpiMonth);const[y,mo]=kpiMonth.split('-');
+  let rows='';
+  for(const[cat,cfg] of Object.entries(KPI_CATS)){
+    const c=entries.filter(e=>e.category===cat).length;
+    let t;if(cfg.perWeek)t=cfg.perWeek*weeks;else t=cfg.total;
+    rows+=`<tr><td>${cat}</td><td>${cfg.kpi}</td><td style="text-align:center">${c}/${t}</td><td style="text-align:center">${t>0?Math.round(c/t*100):0}%</td></tr>`;
+  }
+  let detail='';
+  [...entries].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+    detail+=`<tr><td>${e.date}</td><td>${e.category}</td><td>${e.facility}</td><td>${e.memo||'-'}</td></tr>`;
+  });
+  const h=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>KPIサマリー ${y}年${mo}月</title>
+<style>body{font-family:sans-serif;margin:30px;font-size:13px;}h1{font-size:18px}h2{font-size:14px;margin:20px 0 8px;border-bottom:2px solid #333;padding-bottom:4px}
+table{width:100%;border-collapse:collapse;margin-bottom:16px}th,td{border:1px solid #ccc;padding:6px 10px;text-align:left;font-size:12px}th{background:#f0f0f0;font-weight:600}
+.rv{margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:4px;white-space:pre-wrap;min-height:30px;font-size:12px;line-height:1.8}
+.lb{font-size:12px;font-weight:600;margin-top:10px;margin-bottom:4px}@media print{body{margin:15px}}</style></head><body>
+<h1>FY09下期 アクションプラン（${y}年${parseInt(mo)}月）</h1>
+<h2>月間実績</h2><table><tr><th>アクションプラン</th><th>KPI</th><th>実績</th><th>達成率</th></tr>${rows}</table>
+<h2>活動明細</h2><table><tr><th>日付</th><th>カテゴリ</th><th>施設</th><th>メモ</th></tr>${detail}</table>
+<h2>振り返り</h2>
+<div class="lb">自身の活動：</div><div class="rv">${rv.own||'（未記入）'}</div>
+<div class="lb">他社協業：</div><div class="rv">${rv.collab||'（未記入）'}</div>
+<div class="lb">来月の活動計画：</div><div class="rv">${rv.next||'（未記入）'}</div>
+</body></html>`;
+  const w=window.open('','_blank');w.document.write(h);w.document.close();setTimeout(()=>w.print(),500);
+}
+
+// ===== INIT =====
+loadAll();
+buildChips();
+buildTabs();
+render();
+
+function showBkMenu() {
+  document.getElementById('bkMenu').classList.add('show');
+}
 </script>
 </body>
 </html>
