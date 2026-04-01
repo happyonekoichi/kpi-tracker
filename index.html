@@ -202,19 +202,19 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .kpi-card-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
 @media(max-width:768px){.kpi-card-row{grid-template-columns:1fr;}}
 .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;border-left:3px solid;}
-.kpi-card.kc1{border-left-color:#dc2626;} .kpi-card.kc2{border-left-color:#2563eb;} .kpi-card.kc3{border-left-color:#d97706;}
+.kpi-card.kc1{border-left-color:#dc2626;} .kpi-card.kc2{border-left-color:#2563eb;} .kpi-card.kc3{border-left-color:#d97706;} .kpi-card.kc4{border-left-color:#7c3aed;}
 .kpi-card-title{font-size:12px;font-weight:600;margin-bottom:4px;}
 .kpi-card-target{font-size:10px;color:var(--text3);margin-bottom:8px;}
 .kpi-card-num{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;}
-.kpi-card-num.kc1{color:#dc2626;} .kpi-card-num.kc2{color:#2563eb;} .kpi-card-num.kc3{color:#d97706;}
+.kpi-card-num.kc1{color:#dc2626;} .kpi-card-num.kc2{color:#2563eb;} .kpi-card-num.kc3{color:#d97706;} .kpi-card-num.kc4{color:#7c3aed;}
 .kpi-bar{height:4px;background:var(--surface2);border-radius:2px;margin-top:6px;overflow:hidden;}
 .kpi-bar-fill{height:100%;border-radius:2px;transition:width .5s ease;}
-.kpi-bar-fill.kc1{background:#dc2626;} .kpi-bar-fill.kc2{background:#2563eb;} .kpi-bar-fill.kc3{background:#d97706;}
+.kpi-bar-fill.kc1{background:#dc2626;} .kpi-bar-fill.kc2{background:#2563eb;} .kpi-bar-fill.kc3{background:#d97706;} .kpi-bar-fill.kc4{background:#7c3aed;}
 .kpi-week-bars{display:flex;gap:2px;align-items:flex-end;height:28px;margin-top:6px;}
 .kpi-week-bar{flex:1;border-radius:2px 2px 0 0;min-height:2px;}
 .kpi-log-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;position:relative;}
 .kpi-log-cat{font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;display:inline-block;}
-.kpi-log-cat.kc1{background:#fee2e2;color:#dc2626;} .kpi-log-cat.kc2{background:#dbeafe;color:#1d4ed8;} .kpi-log-cat.kc3{background:#fef3c7;color:#d97706;}
+.kpi-log-cat.kc1{background:#fee2e2;color:#dc2626;} .kpi-log-cat.kc2{background:#dbeafe;color:#1d4ed8;} .kpi-log-cat.kc3{background:#fef3c7;color:#d97706;} .kpi-log-cat.kc4{background:#ede9fe;color:#7c3aed;}
 .kpi-log-fac{font-size:13px;font-weight:500;margin-top:4px;}
 .kpi-log-type{font-size:11px;color:var(--text2);margin-top:2px;}
 .kpi-log-memo{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5;}
@@ -390,6 +390,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
           <span class="chip" onclick="kpiSelectCat('案件創出',this)" style="padding:6px 12px;font-size:12px">案件創出</span>
           <span class="chip" onclick="kpiSelectCat('案件進展',this)" style="padding:6px 12px;font-size:12px">案件進展</span>
           <span class="chip" onclick="kpiSelectCat('予算申請',this)" style="padding:6px 12px;font-size:12px">予算申請</span>
+          <span class="chip" onclick="kpiSelectCat('他社協業',this)" style="padding:6px 12px;font-size:12px">他社協業</span>
         </div>
       </div>
 
@@ -1332,7 +1333,8 @@ let kpiSelectedCat = null;
 const KPI_CATS = {
   '案件創出': {cls:'kc1',kpi:'週5件の新規案件創出活動',perWeek:5},
   '案件進展': {cls:'kc2',kpi:'週2件の案件フェーズの進展',perWeek:2},
-  '予算申請': {cls:'kc3',kpi:'8月までに予算申請可能施設を3件',total:3}
+  '予算申請': {cls:'kc3',kpi:'8月までに予算申請可能施設を3件',total:3},
+  '他社協業': {cls:'kc4',kpi:'週3件の他社協業活動',perWeek:3}
 };
 
 function kpiKey(m){return 'kpi_entries_'+m;}
@@ -1375,7 +1377,7 @@ function renderKpi(){
     else{target=cfg.total;pct=Math.min(Math.round(count/target*100),100);}
     const wd=kpiWeeklyData(kpiMonth,cat);
     const mx=Math.max(...wd.map(w=>w.count),1);
-    const clr=cfg.cls==='kc1'?'#dc2626':cfg.cls==='kc2'?'#2563eb':'#d97706';
+    const clr=cfg.cls==='kc1'?'#dc2626':cfg.cls==='kc2'?'#2563eb':cfg.cls==='kc3'?'#d97706':'#7c3aed';
     let bars='<div class="kpi-week-bars">';
     wd.forEach(w=>{const h=(w.count/mx)*24+4;bars+=`<div class="kpi-week-bar" style="height:${h}px;background:${clr}"></div>`;});
     bars+='</div>';
