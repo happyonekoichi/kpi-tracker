@@ -266,6 +266,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   <button class="btn hdr-bk" onclick="exportBackup()" style="margin-left:auto" title="全データをバックアップ">💾 バックアップ</button>
   <button class="btn hdr-bk" onclick="document.getElementById('importFile').click()" title="バックアップから復元">📂 復元</button>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(this)">
+  <button class="btn hdr-bk" onclick="openCsvImportModal()" title="CSVで施設を一括インポート">📥 CSV取込</button>
+  <input type="file" id="csvImportFile" accept=".csv" style="display:none" onchange="handleCsvFile(this)">
   <button class="btn pri" onclick="openAddModal()">＋ 施設追加</button>
 </div>
 
@@ -335,7 +337,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
     <!-- 過去の日報一覧 -->
     <div class="history-sec">
-      <div class="history-sec-title">過去の日報一覧</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="history-sec-title" style="margin-bottom:0">過去の日報一覧</div>
+        <button class="btn" style="font-size:11px;padding:5px 10px" onclick="openRangeExport()">📋 期間まとめコピー</button>
+      </div>
       <div id="historyList"></div>
     </div>
   </div>
@@ -360,7 +365,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       <button class="btn pri" style="width:100%;justify-content:center" onclick="saveReport()">保存</button>
     </div>
     <div class="rep-history">
-      <div class="rep-history-title">報告履歴</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;border-top:2px solid var(--border);padding-top:14px;margin-top:16px;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;">報告履歴</div>
+        <button id="repFlameFilterBtn" class="btn" style="font-size:11px;padding:4px 10px" onclick="toggleRepFlameFilter()">🔥 意義有りのみ</button>
+      </div>
       <div id="repHistoryList"></div>
     </div>
   </div>
@@ -500,6 +508,84 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
           <button class="btn" onclick="cancelVoice()">✕</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 期間日報エクスポートモーダル -->
+<div class="overlay" id="rangeExportModal">
+  <div class="modal" style="max-width:500px">
+    <h3>📋 期間日報をまとめてエクスポート</h3>
+    <div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-end;">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">開始日</div>
+        <input type="date" id="re-from" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--text);font-family:'Noto Sans JP',sans-serif;outline:none;">
+      </div>
+      <div style="font-size:14px;color:var(--text3);padding-bottom:8px">〜</div>
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">終了日</div>
+        <input type="date" id="re-to" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--text);font-family:'Noto Sans JP',sans-serif;outline:none;">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="reSetRange('thisMonth')">今月</button>
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="reSetRange('lastMonth')">先月</button>
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="reSetRange('last7')">直近7日</button>
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="reSetRange('last30')">直近30日</button>
+    </div>
+    <div id="re-preview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);max-height:200px;overflow-y:auto;line-height:1.7;white-space:pre-wrap;font-family:'JetBrains Mono',monospace;"></div>
+    <div id="re-empty" style="display:none;padding:12px;text-align:center;font-size:13px;color:var(--text3);">指定期間に日報データがありません</div>
+    <div class="modal-actions" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <button class="btn" onclick="closeModal('rangeExportModal')">閉じる</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" id="re-btn-preview" onclick="rePreview()">🔍 プレビュー</button>
+        <button class="btn" id="re-btn-copy" onclick="reCopyText()" style="display:none">📋 テキストコピー</button>
+        <button class="btn pri" id="re-btn-csv" onclick="reExportCsv()" style="display:none">⬇ CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CSV一括インポートモーダル -->
+<div class="overlay" id="csvImportModal">
+  <div class="modal" style="max-width:520px">
+    <h3>📥 施設CSVを一括インポート</h3>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.8">
+      <div style="font-weight:600;margin-bottom:4px;color:var(--text)">📋 CSVフォーマット（MedSales出力と同形式）</div>
+      <code style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--accent)">施設名,都道府県,エリア,機種,ランク,休診日,休診AMPM,AM終了,PM終了,備考メモ</code>
+      <div style="margin-top:6px;color:var(--text3);font-size:11px">
+        ・1行目はヘッダー行として読み飛ばします（不要な場合はそのまま）<br>
+        ・「施設名」列のみ必須。他は空欄可<br>
+        ・機種: Fuji / オリ / 不明 / その他<br>
+        ・ランク: CA / CB / HA / HB / 検診C<br>
+        ・文字コード: UTF-8（BOM付き推奨）またはShift-JIS<br>
+        ・既存の⬇CSVエクスポートのファイルも取り込み可
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div class="fl" style="margin-bottom:6px;font-size:11px;color:var(--text3);text-transform:uppercase">取込モード</div>
+      <div style="display:flex;gap:8px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:8px 12px;border-radius:6px;border:1px solid var(--border);flex:1;background:var(--surface2)">
+          <input type="radio" name="csvMode" value="add" checked style="accent-color:var(--accent)"> 追加（既存を保持）
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:8px 12px;border-radius:6px;border:1px solid var(--border);flex:1;background:var(--surface2)">
+          <input type="radio" name="csvMode" value="replace" style="accent-color:var(--accent)"> 上書き（全件置換）
+        </label>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div class="fl" style="margin-bottom:6px;font-size:11px;color:var(--text3);text-transform:uppercase">重複チェック（追加モード時）</div>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
+        <input type="checkbox" id="csvSkipDup" checked style="accent-color:var(--accent)"> 施設名が同じ施設はスキップする
+      </label>
+    </div>
+    <div id="csvPreview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px;max-height:160px;overflow-y:auto"></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn" style="flex:1;justify-content:center" onclick="document.getElementById('csvImportFile').click()">📂 CSVファイルを選択</button>
+    </div>
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn" onclick="closeModal('csvImportModal');clearCsvState()">キャンセル</button>
+      <button class="btn pri" id="csvExecBtn" onclick="execCsvImport()" style="display:none">✓ 取込実行</button>
     </div>
   </div>
 </div>
@@ -1156,21 +1242,54 @@ function saveReport() {
   showToast('報告を保存しました（施設・日報にも反映）','ok');
 }
 
+let repFlameFilterOn = false;
+function toggleRepFlameFilter() {
+  repFlameFilterOn = !repFlameFilterOn;
+  const btn = document.getElementById('repFlameFilterBtn');
+  if (repFlameFilterOn) {
+    btn.style.background = '#fff7ed';
+    btn.style.borderColor = '#f97316';
+    btn.style.color = '#f97316';
+  } else {
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+  renderRepHistory();
+}
+function toggleRepFlame(id) {
+  const r = reportData.find(x => x.id === id);
+  if (!r) return;
+  r.flagged = !r.flagged;
+  saveR();
+  renderRepHistory();
+  showToast(r.flagged ? '🔥 意義有りにしました' : 'フラグを外しました', 'ok');
+}
 function renderRepHistory() {
   const ct=document.getElementById('repHistoryList');
-  const sorted=[...reportData].sort((a,b)=>b.date>a.date?1:-1);
-  if (!sorted.length) { ct.innerHTML='<div style="font-size:12px;color:var(--text3)">報告履歴がありません</div>'; return; }
-  ct.innerHTML=sorted.map(r=>
-    '<div class="rep-card">' +
+  let sorted=[...reportData].sort((a,b)=>b.date>a.date?1:-1);
+  if (repFlameFilterOn) sorted = sorted.filter(r => r.flagged);
+  if (!sorted.length) {
+    ct.innerHTML='<div style="font-size:12px;color:var(--text3)">'+(repFlameFilterOn?'🔥 意義有りの報告はありません':'報告履歴がありません')+'</div>';
+    return;
+  }
+  ct.innerHTML=sorted.map(r=> {
+    const flagged = r.flagged;
+    const cardStyle = flagged ? 'border-color:#f97316;background:#fff7ed;' : '';
+    const flameBtnStyle = flagged
+      ? 'color:#f97316;font-size:15px;'
+      : 'color:var(--text3);font-size:15px;opacity:0.35;';
+    return '<div class="rep-card" style="' + cardStyle + '">' +
     '<button class="rep-del" onclick="delReport('+r.id+')">✕</button>' +
-    '<button class="copy-btn" onclick="copyReport('+r.id+')" title="コピー">📋</button>' +
+    '<button class="copy-btn" onclick="copyReport('+r.id+')" title="コピー" style="right:56px">📋</button>' +
+    '<button class="copy-btn" onclick="toggleRepFlame('+r.id+')" title="意義有りフラグ" style="right:32px;' + flameBtnStyle + '">🔥</button>' +
     '<div class="rep-card-hdr">' +
-    '<div class="rep-card-date">'+r.date+'</div>' +
+    '<div class="rep-card-date">'+r.date+(flagged?' <span style="font-size:11px;color:#f97316;font-weight:600">🔥 意義有り</span>':'')+'</div>' +
     '</div>' +
     '<div class="rep-card-name">🏥 '+(r.facilityName||'施設不明')+'</div>' +
     '<div class="rep-card-body">'+r.content+'</div>' +
-    '</div>'
-  ).join('');
+    '</div>';
+  }).join('');
 }
 
 function copyReport(id) {
@@ -1184,6 +1303,136 @@ function fallbackCopy(text) {
   const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
   document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
   showToast('コピーしました','ok');
+}
+
+// ===== 期間日報エクスポート =====
+function openRangeExport() {
+  // デフォルト：今月の1日〜今日
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  document.getElementById('re-from').value = y + '-' + pad(m+1) + '-01';
+  document.getElementById('re-to').value = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+  document.getElementById('re-preview').style.display = 'none';
+  document.getElementById('re-empty').style.display = 'none';
+  document.getElementById('re-btn-copy').style.display = 'none';
+  document.getElementById('re-btn-csv').style.display = 'none';
+  document.getElementById('rangeExportModal').classList.add('show');
+}
+
+function reSetRange(mode) {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+  let from, to;
+  if (mode === 'thisMonth') {
+    from = new Date(y, m, 1); to = now;
+  } else if (mode === 'lastMonth') {
+    from = new Date(y, m-1, 1); to = new Date(y, m, 0);
+  } else if (mode === 'last7') {
+    from = new Date(y, m, d-6); to = now;
+  } else if (mode === 'last30') {
+    from = new Date(y, m, d-29); to = now;
+  }
+  const fmt = dt => dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+  document.getElementById('re-from').value = fmt(from);
+  document.getElementById('re-to').value = fmt(to);
+  document.getElementById('re-preview').style.display = 'none';
+  document.getElementById('re-empty').style.display = 'none';
+  document.getElementById('re-btn-copy').style.display = 'none';
+  document.getElementById('re-btn-csv').style.display = 'none';
+}
+
+function reGetRangeDays() {
+  const fromVal = document.getElementById('re-from').value;
+  const toVal = document.getElementById('re-to').value;
+  if (!fromVal || !toVal) { showToast('日付を指定してください', 'err'); return null; }
+  // dailyDataのキーはYYYY/MM/DD形式
+  const fromSlash = fromVal.replace(/-/g, '/');
+  const toSlash = toVal.replace(/-/g, '/');
+  if (fromSlash > toSlash) { showToast('開始日が終了日より後になっています', 'err'); return null; }
+  const days = Object.keys(dailyData)
+    .filter(d => {
+      const day = dailyData[d];
+      return d >= fromSlash && d <= toSlash && ((day.visits && day.visits.length) || day.summary);
+    })
+    .sort();
+  return days;
+}
+
+function rePreview() {
+  const days = reGetRangeDays();
+  if (days === null) return;
+  const prevEl = document.getElementById('re-preview');
+  const emptyEl = document.getElementById('re-empty');
+  if (!days.length) {
+    prevEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    document.getElementById('re-btn-copy').style.display = 'none';
+    document.getElementById('re-btn-csv').style.display = 'none';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  const text = reBuildText(days);
+  prevEl.textContent = text;
+  prevEl.style.display = 'block';
+  document.getElementById('re-btn-copy').style.display = '';
+  document.getElementById('re-btn-csv').style.display = '';
+}
+
+function reBuildText(days) {
+  const dn = ['日','月','火','水','木','金','土'];
+  let lines = [];
+  days.forEach(d => {
+    const day = dailyData[d];
+    const p = d.split('/');
+    const dt = new Date(+p[0], +p[1]-1, +p[2]);
+    lines.push('■ ' + d + '（' + dn[dt.getDay()] + '）');
+    if (day.summary) lines.push('【所感】' + day.summary);
+    (day.visits || []).forEach(v => {
+      lines.push('　' + (v.name || '施設不明') + '：' + v.content);
+    });
+    lines.push('');
+  });
+  return lines.join('\n').trim();
+}
+
+function reCopyText() {
+  const days = reGetRangeDays();
+  if (!days || !days.length) { showToast('コピーするデータがありません', 'err'); return; }
+  const text = reBuildText(days);
+  navigator.clipboard.writeText(text)
+    .then(() => showToast(days.length + '日分の日報をコピーしました', 'ok'))
+    .catch(() => { fallbackCopy(text); });
+}
+
+function reExportCsv() {
+  const days = reGetRangeDays();
+  if (!days || !days.length) { showToast('エクスポートするデータがありません', 'err'); return; }
+  const rows = [['日付', '曜日', '所感', '施設名', '訪問内容']];
+  const dn = ['日','月','火','水','木','金','土'];
+  days.forEach(d => {
+    const day = dailyData[d];
+    const p = d.split('/');
+    const dt = new Date(+p[0], +p[1]-1, +p[2]);
+    const youbi = dn[dt.getDay()];
+    const summary = day.summary || '';
+    const visits = day.visits || [];
+    if (!visits.length) {
+      rows.push([d, youbi, summary, '', '']);
+    } else {
+      visits.forEach((v, i) => {
+        rows.push([d, youbi, i === 0 ? summary : '', v.name || '', v.content || '']);
+      });
+    }
+  });
+  const csv = '\uFEFF' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+  const fromVal = document.getElementById('re-from').value;
+  const toVal = document.getElementById('re-to').value;
+  const fname = 'daily_' + fromVal + '_' + toVal + '.csv';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'}));
+  a.download = fname;
+  a.click();
+  showToast(days.length + '日分をCSVエクスポートしました', 'ok');
 }
 
 function delReport(id) {
@@ -1236,6 +1485,188 @@ function exportCSV() {
   a.download='medsales_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
   showToast('CSVをエクスポートしました','ok');
+}
+
+// ===== CSV インポート =====
+let csvParsedRows = [];
+
+function openCsvImportModal() {
+  csvParsedRows = [];
+  document.getElementById('csvPreview').style.display = 'none';
+  document.getElementById('csvExecBtn').style.display = 'none';
+  document.querySelector('input[name="csvMode"][value="add"]').checked = true;
+  document.getElementById('csvSkipDup').checked = true;
+  document.getElementById('csvImportFile').value = '';
+  document.getElementById('csvImportModal').classList.add('show');
+}
+
+function clearCsvState() {
+  csvParsedRows = [];
+  document.getElementById('csvImportFile').value = '';
+}
+
+function handleCsvFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let text = e.target.result;
+    // BOM除去
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    parseCsvPreview(text);
+  };
+  // UTF-8で試みる（Shift-JIS対応）
+  try {
+    reader.readAsText(file, 'utf-8');
+  } catch(err) {
+    reader.readAsText(file, 'shift-jis');
+  }
+}
+
+function parseCsvLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (c === ',' && !inQ) {
+      result.push(cur); cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+function parseCsvPreview(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) { showToast('CSVが空です', 'err'); return; }
+
+  // ヘッダー判定：1行目に「施設名」または「ID」が含まれていればヘッダーとみなす
+  const firstCols = parseCsvLine(lines[0]).map(c => c.trim());
+  const hasHeader = firstCols.some(c => c === '施設名' || c === 'ID' || c === '施設');
+  const dataLines = hasHeader ? lines.slice(1) : lines;
+
+  // 列マッピング（ヘッダー有の場合は列名で判断、無の場合はMedSales出力順を仮定）
+  let colMap = {};
+  if (hasHeader) {
+    firstCols.forEach((c, i) => {
+      if (c === '施設名' || c === '施設') colMap.name = i;
+      else if (c === '都道府県' || c === '県') colMap.prefecture = i;
+      else if (c === 'エリア' || c === '地区') colMap.area = i;
+      else if (c === '機種') colMap.model = i;
+      else if (c === 'ランク') colMap.rank = i;
+      else if (c === '休診日') colMap.holiday = i;
+      else if (c === '休診AMPM') colMap.holiday_ampm = i;
+      else if (c === 'AM終了') colMap.am_end = i;
+      else if (c === 'PM終了') colMap.pm_end = i;
+      else if (c === '備考メモ' || c === 'メモ') colMap.memo = i;
+    });
+  } else {
+    // ID付き（MedSales export）: ID,施設名,都道府県,エリア,機種,ランク,...
+    // ID無し（手作成）: 施設名,都道府県,エリア,機種,ランク,...
+    const hasMaybeId = firstCols.length >= 6 && !isNaN(Number(firstCols[0]));
+    const offset = hasMaybeId ? 1 : 0;
+    colMap = { name: offset, prefecture: offset+1, area: offset+2, model: offset+3, rank: offset+4,
+               holiday: offset+5, holiday_ampm: offset+6, am_end: offset+7, pm_end: offset+8, memo: offset+9 };
+  }
+
+  if (colMap.name === undefined) {
+    showToast('「施設名」列が見つかりません', 'err'); return;
+  }
+
+  csvParsedRows = [];
+  const errors = [];
+  dataLines.forEach((line, idx) => {
+    if (!line.trim()) return;
+    const cols = parseCsvLine(line);
+    const name = (cols[colMap.name] || '').trim();
+    if (!name) return;
+    csvParsedRows.push({
+      name,
+      prefecture: colMap.prefecture !== undefined ? (cols[colMap.prefecture] || '').trim() : '',
+      area:       colMap.area       !== undefined ? (cols[colMap.area]       || '').trim() : '',
+      model:      colMap.model      !== undefined ? (cols[colMap.model]      || '').trim() : '',
+      rank:       colMap.rank       !== undefined ? (cols[colMap.rank]       || '').trim() : '',
+      holiday:    colMap.holiday    !== undefined ? (cols[colMap.holiday]    || '').trim() : '',
+      holiday_ampm: colMap.holiday_ampm !== undefined ? (cols[colMap.holiday_ampm] || '').trim() : '',
+      am_end:     colMap.am_end     !== undefined ? (cols[colMap.am_end]     || '').trim() : '',
+      pm_end:     colMap.pm_end     !== undefined ? (cols[colMap.pm_end]     || '').trim() : '',
+      memo:       colMap.memo       !== undefined ? (cols[colMap.memo]       || '').trim() : ''
+    });
+  });
+
+  if (!csvParsedRows.length) { showToast('有効なデータ行がありません', 'err'); return; }
+
+  // プレビュー表示
+  const preview = document.getElementById('csvPreview');
+  const sample = csvParsedRows.slice(0, 5);
+  let html = '<div style="font-weight:600;margin-bottom:6px;color:var(--text)">✅ ' + csvParsedRows.length + '件を読み込みました（先頭5件）</div>';
+  html += '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+  html += '<tr style="color:var(--text3)"><th style="text-align:left;padding:2px 4px;border-bottom:1px solid var(--border)">施設名</th><th style="text-align:left;padding:2px 4px;border-bottom:1px solid var(--border)">都道府県</th><th style="text-align:left;padding:2px 4px;border-bottom:1px solid var(--border)">エリア</th><th style="text-align:left;padding:2px 4px;border-bottom:1px solid var(--border)">機種</th><th style="text-align:left;padding:2px 4px;border-bottom:1px solid var(--border)">ランク</th></tr>';
+  sample.forEach(r => {
+    html += '<tr><td style="padding:3px 4px;border-bottom:1px solid var(--border)">' + r.name + '</td><td style="padding:3px 4px;border-bottom:1px solid var(--border)">' + (r.prefecture||'—') + '</td><td style="padding:3px 4px;border-bottom:1px solid var(--border)">' + (r.area||'—') + '</td><td style="padding:3px 4px;border-bottom:1px solid var(--border)">' + (r.model||'—') + '</td><td style="padding:3px 4px;border-bottom:1px solid var(--border)">' + (r.rank||'—') + '</td></tr>';
+  });
+  if (csvParsedRows.length > 5) html += '<tr><td colspan="5" style="padding:4px;color:var(--text3);text-align:center">… 他 ' + (csvParsedRows.length - 5) + '件</td></tr>';
+  html += '</table>';
+  preview.innerHTML = html;
+  preview.style.display = 'block';
+  document.getElementById('csvExecBtn').style.display = '';
+}
+
+function execCsvImport() {
+  if (!csvParsedRows.length) { showToast('CSVファイルを選択してください', 'err'); return; }
+  const mode = document.querySelector('input[name="csvMode"]:checked').value;
+  const skipDup = document.getElementById('csvSkipDup').checked;
+
+  if (mode === 'replace') {
+    if (!confirm('既存の施設データ（' + facilities.length + '件）をすべて削除し、CSVの' + csvParsedRows.length + '件で置き換えます。\n\n訪問ログ・日報・報告は保持されます。\n続けますか？')) return;
+    facilities = [];
+    nextId = 3000;
+  }
+
+  let added = 0, skipped = 0;
+  csvParsedRows.forEach(row => {
+    if (skipDup && mode === 'add') {
+      const dup = facilities.find(f => f.name === row.name);
+      if (dup) { skipped++; return; }
+    }
+    facilities.push({
+      id: nextId++,
+      name: row.name,
+      prefecture: row.prefecture,
+      area: row.area,
+      model: row.model,
+      rank: row.rank,
+      holiday: row.holiday,
+      holiday_ampm: row.holiday_ampm,
+      am_end: row.am_end,
+      pm_end: row.pm_end,
+      memo: row.memo
+    });
+    added++;
+  });
+
+  saveF();
+  buildChips();
+  buildTabs();
+  activePref = '全県';
+  activeView = 'list';
+  document.getElementById('listView').style.display = '';
+  ['dailyView','reportView','kpiView'].forEach(id => document.getElementById(id).classList.remove('show'));
+  activeFilters = {};
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  render();
+
+  closeModal('csvImportModal');
+  clearCsvState();
+  let msg = added + '件を追加しました';
+  if (skipped) msg += '（重複スキップ: ' + skipped + '件）';
+  if (mode === 'replace') msg = csvParsedRows.length + '件で置き換えました';
+  showToast(msg, 'ok');
 }
 
 // ===== バックアップ / 復元 =====
